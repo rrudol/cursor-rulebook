@@ -30,13 +30,11 @@ Cursor is an AI-powered code editor that can be enhanced with custom rules to en
 - **[Rule Showcase](docs/rule-showcase.md)** - Success stories and real-world implementations
 - **[Installation Guide](scripts/install-rules.sh)** - Easy installation script with category options
 
-## 🤝 Contributing
+## 🛠️ Usage
 
-Contributions are welcome! We'd love to have your cursor rules in the collection. Please see our [Contributing Guide](CONTRIBUTING.md) for detailed instructions.
+This is a personal collection of cursor rules designed to streamline development workflow. Feel free to use any rules that work for your projects:
 
-**Quick Start**:
-
-- Use **English** for all rule content (see Language Consistency Rule 🇬🇧)
-- Follow the [writing guide](docs/writing-effective-rules.md) for best practices
-- Use appropriate [templates](templates/) for consistency
-- Test your rules with `./scripts/validate-rules.sh` before submitting
+- Browse the [rule categories](.cursor/rules/categories/) to find relevant rules
+- Follow the [writing guide](docs/writing-effective-rules.md) to create your own rules
+- Use the [templates](templates/) for consistency when creating new rules
+- Validate your rules with `./scripts/validate-rules.sh` for quality assurance
