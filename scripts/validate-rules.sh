@@ -4,6 +4,8 @@
 # Validates rule syntax, formatting, and best practices
 
 set -e
+# Disable pipefail to handle broken pipes gracefully
+set +o pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 RULES_DIR="$(dirname "$SCRIPT_DIR")/.cursor/rules"
@@ -125,7 +127,7 @@ validate_markdown_structure() {
     content=$(awk '/^---$/{if(++count==2) next} count>=2' "$file")
     
     # Check for title (first non-empty line should be # Title)
-    local first_line=$(echo "$content" | grep -v '^[[:space:]]*$' | head -1)
+    local first_line=$(echo "$content" | grep -v '^[[:space:]]*$' | head -1 2>/dev/null || true)
     if [[ ! "$first_line" =~ ^#[[:space:]] ]]; then
         echo -e "${RED}❌ Missing or invalid title (should start with '# ')${NC}"
         ((error_count++))
