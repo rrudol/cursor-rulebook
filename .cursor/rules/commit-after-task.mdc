@@ -1,0 +1,64 @@
+# Commit and Push After Each Completed Task 💾🚀
+
+To ensure traceability, collaboration, and a clean project history, always commit and push your changes after completing each task.
+
+## Rule
+
+- **After marking any task as `completed`, immediately:**
+  1. **Stage all relevant changes** (use `git add`)
+  2. **Create a commit** with a clear, descriptive message summarizing the completed task (e.g., `feat(auth): implement login endpoint` or `fix: resolve admin panel bug`)
+  3. **Push** the commit to the remote repository (`git push`)
+
+## Commit Message Guidelines
+
+- Use [Conventional Commits](https://www.conventionalcommits.org/) style if possible:
+  - `feat: ...` for new features
+  - `fix: ...` for bug fixes
+  - `docs: ...` for documentation
+  - `refactor: ...` for code refactoring
+  - `test: ...` for tests
+  - `chore: ...` for maintenance
+- Be concise but informative (describe what and why, not how)
+- Reference the task or feature if relevant
+
+## Examples
+
+### ✅ Good
+
+```
+git add .
+git commit -m "feat(notifications): add email notification system"
+git push
+```
+
+```
+git add src/admin/*
+git commit -m "fix: resolve admin panel crash on login"
+git push
+```
+
+### ❌ Bad
+
+```
+git commit -am "changes"
+git push
+```
+
+```
+git commit -m "done"
+git push
+```
+
+## Motivation
+
+- 🕒 **Keeps project history granular and clear**
+- 🤝 **Facilitates collaboration and code review**
+- 🛡️ **Reduces risk of losing work**
+- 📈 **Makes progress visible to the team**
+
+**Remember:** Every completed task deserves its own commit and push, with a message that tells the story! ✨
+description:
+globs:
+alwaysApply: false
+
+---

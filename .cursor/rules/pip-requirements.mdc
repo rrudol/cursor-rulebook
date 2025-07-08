@@ -1,0 +1,18 @@
+---
+description: Use it whenever doing any changes in Python code
+globs: 
+alwaysApply: false
+---
+# Python Dependency Management
+
+All dependencies installed via pip must be automatically added to the requirements.txt file.
+
+## Rules
+
+1. **After each package installation via pip**: Update requirements.txt
+
+2. **Before making changes**:
+   - Check if new imports require package installation
+   - If so, install them and update requirements.txt
+
+Each of these packages must be added to requirements.txt after installation.

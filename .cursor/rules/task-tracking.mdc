@@ -1,0 +1,89 @@
+---
+alwaysApply: true
+---
+
+# Active Task Tracking 📋
+
+This rule encourages the AI to proactively manage tasks during every coding session.
+
+## When to Use the Task Tool
+
+**ALWAYS** use the `todo_write` tool when:
+
+1. **Complex multi-step tasks** (3+ steps)
+
+   - Implementing new features
+   - Refactoring code
+   - Debugging complex issues
+
+2. **The user provides a list of tasks**
+
+   - Multiple tasks separated by commas
+   - Numbered requirement lists
+   - Complex feature requests
+
+3. **At the start of a new session**
+
+   - Analyze the user's requirements
+   - Create a task list with `merge=false`
+   - Set the first task as `in_progress`
+
+4. **After completing tasks**
+   - Mark as `completed` immediately after finishing
+   - Add follow-up tasks if needed (`merge=true`)
+   - Keep only ONE task `in_progress` at a time
+
+## Good Practice Examples
+
+### ✅ Good – Use todo_write
+
+```
+User: "Add authentication, admin panel, and notification system"
+
+AI creates a list:
+1. Implement authentication - pending
+2. Create admin panel - pending (depends on: 1)
+3. Notification system - pending
+4. Integration tests - pending (depends on: 1,2,3)
+```
+
+### ✅ Good – Track progress
+
+```
+AI marks task 1 as completed, next as in_progress:
+1. Implement authentication - completed ✓
+2. Create admin panel - in_progress 🔄
+3. Notification system - pending
+```
+
+### ❌ Bad – Don't use todo_write
+
+```
+User: "How to print 'Hello World' in Python?"
+AI: Answers directly without creating tasks
+```
+
+## Task Management Principles
+
+1. **Be Specific** – tasks should be actionable
+2. **Use Dependencies** – logical links between tasks
+3. **Update Status** – immediately after changes
+4. **Organize Complexity** – break large tasks into smaller ones
+5. **One in Progress** – only one task `in_progress` at a time
+
+## Communication with the User
+
+- **Show progress** – "✅ Completed: login implementation"
+- **Explain next steps** – "🔄 Now working on: admin panel"
+- **Be transparent** – "📋 Created a list of 4 tasks to accomplish"
+
+## Motivation
+
+Systematic task tracking:
+
+- 🎯 **Increases focus** – clear goals to achieve
+- 📊 **Shows progress** – visible completion of steps
+- 🔄 **Ensures continuity** – nothing gets forgotten
+- ✨ **Builds trust** – user sees organized workflow
+
+**Remember**: Proactive task management is a sign of professionalism and care for quality delivery! 🚀

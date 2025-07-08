@@ -1,0 +1,51 @@
+---
+description: when nodejs package manager has to be used (like npm, yarn or pnpm)
+alwaysApply: false
+---
+
+Always use pnpm as the package manager. Do not use npm or yarn. For executing packages from the registry, use pnpm dlx instead of npx.
+
+Specific Command Replacements:
+
++----------------------------+-------------------------+
+| Instead of... | Use... |
++----------------------------+-------------------------+
+| npm install | pnpm install |
+| npm install <package> | pnpm add <package> |
+| npm install -D <package> | pnpm add -D <package> |
+| npm run <script> | pnpm <script> |
+| npx <command> | pnpm dlx <command> |
++----------------------------+-------------------------+
+
+Eksportuj do Arkuszy
+Examples:
+
+Installing all project dependencies:
+
+Don't: npm install
+
+Do: pnpm install
+
+Adding a new dependency:
+
+Don't: npm install react
+
+Do: pnpm add react
+
+Adding a new development dependency:
+
+Don't: npm install -D tailwindcss
+
+Do: pnpm add -D tailwindcss
+
+Running a script from package.json:
+
+Don't: npm run dev
+
+Do: pnpm dev
+
+Executing a package binary from the registry:
+
+Don't: npx shadcn-ui@latest init
+
+Do: pnpm dlx shadcn-ui@latest init
