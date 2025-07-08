@@ -179,8 +179,10 @@ validate_content_quality() {
     local file="$1"
     local content=$(cat "$file")
     
-    # Check for placeholder content
-    local placeholders=$(echo "$content" | grep -c "\[.*\]" || true)
+    # Check for placeholder content (excluding code blocks)
+    # Remove code blocks first, then check for placeholders
+    local content_no_code=$(echo "$content" | sed '/```/,/```/d')
+    local placeholders=$(echo "$content_no_code" | grep -c "\[TODO\]\|\[PLACEHOLDER\]\|\[FIXME\]\|\[.*\.\.\.\]" || true)
     if [[ $placeholders -gt 0 ]]; then
         echo -e "${RED}❌ Found $placeholders placeholder(s) - replace with actual content${NC}"
         ((error_count++))
