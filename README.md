@@ -27,6 +27,7 @@ Cursor is an AI-powered code editor that can be enhanced with custom rules to en
 
 - **[Writing Effective Rules](docs/writing-effective-rules.md)** - Comprehensive guide on creating powerful cursor rules
 - **[Rule Templates](templates/README.md)** - Ready-to-use templates for different rule types
+- **[Rule Showcase](docs/rule-showcase.md)** - Success stories and real-world implementations
 - **[Installation Guide](scripts/install-rules.sh)** - Easy installation script with category options
 
 ## 🤝 Contributing
