@@ -1,10 +1,10 @@
 ---
-description:
-globs:
+description: Guidelines for organizing and maintaining Cursor AI rules in the project structure
+globs: ["**/.cursor/rules/**/*.mdc"]
 alwaysApply: true
 ---
 
-# Cursor Rules Location
+# Cursor Rules Location 🛠️
 
 How to add new cursor rules to the project
 
