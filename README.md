@@ -1,5 +1,7 @@
 # Cursor Rulebook 📚✨
 
+[![Validate Cursor Rules](https://github.com/rrudol/cursor-rulebook/actions/workflows/validate-rules.yml/badge.svg)](https://github.com/rrudol/cursor-rulebook/actions/workflows/validate-rules.yml)
+
 Welcome to the **Cursor Rulebook**! This repository is dedicated to building a **sharable set of rules** for [Cursor](https://www.cursor.so/) to help you streamline, standardize, and supercharge your project development. 🚀
 
 ## 🌟 Introduction
