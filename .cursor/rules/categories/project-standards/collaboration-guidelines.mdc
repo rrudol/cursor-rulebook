@@ -1,0 +1,389 @@
+---
+description: General collaboration guidelines and project philosophy for team development
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# Collaboration Guidelines & Project Philosophy 🤝
+
+This rule establishes fundamental collaboration principles, Git conventions, and development philosophy for maintaining high-quality codebases.
+
+## Git & Collaboration Standards 🔄
+
+### Conventional Commits
+
+All commits **MUST** follow the [Conventional Commits](https://www.conventionalcommits.org/) specification to maintain clear project history and enable automated tooling.
+
+#### Commit Message Format
+
+```
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+#### Commit Types
+
+```bash
+# ✅ New functionality
+feat: add user authentication system
+feat(auth): implement OAuth login flow
+
+# ✅ Bug fixes
+fix: resolve login redirect issue
+fix(api): handle null response in user endpoint
+
+# ✅ Code refactoring (no functional changes)
+refactor: extract user validation logic to separate module
+refactor(components): simplify Button component props
+
+# ✅ Configuration and tooling changes
+chore: update dependencies to latest versions
+chore(ci): add automated testing workflow
+
+# ✅ Documentation updates
+docs: add API documentation for user endpoints
+docs(readme): update installation instructions
+
+# ✅ Test additions or improvements
+test: add unit tests for authentication service
+test(e2e): add login flow integration tests
+
+# ✅ Code formatting and style fixes
+style: fix indentation in UserProfile component
+style: apply prettier formatting to all files
+```
+
+### Best Practices
+
+#### Commit Message Guidelines
+
+```bash
+# ✅ Good commit messages
+feat(auth): add password reset functionality
+fix(ui): resolve button alignment on mobile devices
+refactor: extract common validation utilities
+
+# ❌ Bad commit messages
+fix: stuff
+update
+changes
+wip
+```
+
+#### Commit Frequency
+
+- **Small, focused commits**: Each commit should represent a single logical change
+- **Complete functionality**: Don't commit broken or incomplete features
+- **Test before commit**: Ensure all tests pass before committing
+
+#### Branch Naming
+
+```bash
+# ✅ Feature branches
+feature/user-authentication
+feature/payment-integration
+feat/dashboard-redesign
+
+# ✅ Bug fix branches
+fix/login-redirect-issue
+bugfix/memory-leak-dashboard
+hotfix/security-vulnerability
+
+# ✅ Refactoring branches
+refactor/api-error-handling
+refactor/component-structure
+```
+
+## General Principles & Project Philosophy 💭
+
+### KISS (Keep It Simple, Stupid) 🎯
+
+Choose the simplest possible solution that solves the problem effectively.
+
+```typescript
+// ❌ Over-engineered solution
+class UserDataManagerFactoryBuilder {
+  private strategies: Map<string, UserDataStrategy> = new Map();
+
+  createFactoryForUserType(userType: string): UserDataFactory {
+    return new UserDataFactory(this.strategies.get(userType));
+  }
+}
+
+// ✅ Simple, direct solution
+const getUserData = (userId: string): Promise<User> => {
+  return fetch(`/api/users/${userId}`).then((res) => res.json());
+};
+```
+
+#### Anti-Patterns to Avoid
+
+- **Premature optimization**: Don't optimize until you have a performance problem
+- **Over-abstraction**: Don't create abstractions until you need them
+- **Complex inheritance**: Favor composition over deep inheritance hierarchies
+- **Magic configurations**: Avoid overly complex configuration systems
+
+### DRY (Don't Repeat Yourself) 🔄
+
+Eliminate code duplication by creating reusable components, hooks, and utilities.
+
+```typescript
+// ❌ Repeated validation logic
+const validateEmail = (email: string) => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+};
+
+const validateUserEmail = (email: string) => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+};
+
+const validateAdminEmail = (email: string) => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+};
+
+// ✅ Reusable validation utility
+// lib/validation.ts
+export const isValidEmail = (email: string): boolean => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+};
+
+// Usage across components
+import { isValidEmail } from "@/lib/validation";
+```
+
+#### DRY Implementation Strategies
+
+**Reusable Components**
+
+```typescript
+// ✅ Generic reusable component
+interface FormFieldProps {
+  label: string;
+  error?: string;
+  children: React.ReactNode;
+}
+
+const FormField: React.FC<FormFieldProps> = ({ label, error, children }) => (
+  <div className="mb-4">
+    <label className="block text-sm font-medium mb-2">{label}</label>
+    {children}
+    {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+  </div>
+);
+```
+
+**Custom Hooks**
+
+```typescript
+// ✅ Reusable API logic
+const useApiData = <T>(endpoint: string) => {
+  const [data, setData] = useState<T | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(endpoint);
+        const result = await response.json();
+        setData(result);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Unknown error");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [endpoint]);
+
+  return { data, loading, error };
+};
+```
+
+**Utility Functions**
+
+```typescript
+// ✅ Common utility functions
+// lib/utils.ts
+export const formatCurrency = (amount: number, currency = "USD"): string => {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency,
+  }).format(amount);
+};
+
+export const debounce = <T extends (...args: any[]) => any>(
+  func: T,
+  delay: number
+): T => {
+  let timeoutId: NodeJS.Timeout;
+  return ((...args: any[]) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func(...args), delay);
+  }) as T;
+};
+```
+
+### Write Code for Humans 👥
+
+Code should be readable, maintainable, and self-documenting.
+
+#### Meaningful Naming
+
+```typescript
+// ❌ Poor naming
+const d = new Date();
+const u = users.filter((x) => x.a > 18);
+const calc = (a: number, b: number) => a * b * 0.1;
+
+// ✅ Descriptive naming
+const currentDate = new Date();
+const adultUsers = users.filter((user) => user.age > 18);
+const calculateDiscountAmount = (price: number, quantity: number) =>
+  price * quantity * DISCOUNT_RATE;
+```
+
+#### Self-Documenting Code
+
+```typescript
+// ✅ Clear, readable code structure
+interface User {
+  id: string;
+  email: string;
+  isEmailVerified: boolean;
+  createdAt: Date;
+}
+
+const canUserAccessPremiumFeatures = (user: User): boolean => {
+  const hasVerifiedEmail = user.isEmailVerified;
+  const isAccountOldEnough =
+    user.createdAt < new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+  return hasVerifiedEmail && isAccountOldEnough;
+};
+
+// Usage is self-explanatory
+if (canUserAccessPremiumFeatures(currentUser)) {
+  showPremiumFeatures();
+}
+```
+
+#### Code Comments Guidelines
+
+```typescript
+// ✅ When to add comments
+class PaymentProcessor {
+  // Complex business logic deserves explanation
+  private calculateTax(amount: number, region: string): number {
+    // Tax calculation follows regional tax code requirements
+    // See: https://company.com/tax-regulations/regional-codes
+    switch (region) {
+      case 'EU':
+        return amount * 0.20; // VAT rate for EU
+      case 'US':
+        return amount * 0.08; // Average state sales tax
+      default:
+        return 0;
+    }
+  }
+
+  // ❌ Don't comment obvious code
+  // Increment counter by 1
+  counter++;
+
+  // ❌ Don't use comments to explain bad code - refactor instead
+  // This is a hack to make it work
+  const result = data.map(x => x.id).filter(Boolean)[0] || null;
+}
+```
+
+#### Function and Variable Clarity
+
+```typescript
+// ✅ Functions should do one thing well
+const validateUserInput = (input: string): boolean => {
+  return input.trim().length > 0 && input.length <= 255;
+};
+
+const sanitizeUserInput = (input: string): string => {
+  return input.trim().replace(/[<>]/g, "");
+};
+
+const saveUserData = async (userData: UserData): Promise<void> => {
+  await database.users.create(userData);
+};
+
+// ✅ Use the function composition
+const processUserInput = async (rawInput: string): Promise<void> => {
+  if (!validateUserInput(rawInput)) {
+    throw new Error("Invalid input");
+  }
+
+  const sanitizedInput = sanitizeUserInput(rawInput);
+  const userData = createUserData(sanitizedInput);
+
+  await saveUserData(userData);
+};
+```
+
+## Code Review Guidelines 👀
+
+### What to Look For
+
+**Functionality**
+
+- Does the code solve the intended problem?
+- Are edge cases handled appropriately?
+- Is error handling implemented correctly?
+
+**Readability**
+
+- Are variable and function names descriptive?
+- Is the code structure logical and easy to follow?
+- Are comments helpful and necessary?
+
+**Maintainability**
+
+- Is the code modular and reusable?
+- Are there any code smells or anti-patterns?
+- Does it follow established project conventions?
+
+**Performance**
+
+- Are there obvious performance bottlenecks?
+- Is the solution appropriately efficient for the use case?
+
+### Review Communication
+
+```markdown
+# ✅ Constructive feedback
+
+"Consider extracting this logic into a separate function for better reusability"
+"This could be simplified using the existing utility function in lib/utils"
+"Great solution! One suggestion: we could add error handling for the edge case when..."
+
+# ❌ Unhelpful feedback
+
+"This is wrong"
+"Bad code"
+"Rewrite this"
+```
+
+## Motivation
+
+- 🤝 **Team Cohesion**: Consistent practices reduce friction and improve collaboration
+- 📚 **Knowledge Sharing**: Clear conventions make code accessible to all team members
+- 🔍 **Maintainability**: Well-structured code is easier to debug and extend
+- ⚡ **Productivity**: Standard practices reduce decision fatigue and speed up development
+- 🎯 **Quality**: Consistent standards lead to higher quality, more reliable code
+
+## Related Rules
+
+- [`react-typescript-frontend.mdc`](./react-typescript-frontend.mdc) - Frontend development standards
+- [`language_en.mdc`](../language_en.mdc) - English language consistency
+- [`task-tracking.mdc`](../../ai-behavior/task-tracking.mdc) - Task management practices
