@@ -1,8 +1,8 @@
 ---
 description: Use it whenever doing any changes in Python code
-globs: 
 alwaysApply: false
 ---
+
 # Python Dependency Management
 
 All dependencies installed via pip must be automatically added to the requirements.txt file.

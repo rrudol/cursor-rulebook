@@ -1,5 +1,5 @@
 ---
-description: when nodejs package manager has to be used (like npm, yarn or pnpm)
+description: when nodejs package manager has to be used (like npm, yarn or pnpm
 alwaysApply: false
 ---
 

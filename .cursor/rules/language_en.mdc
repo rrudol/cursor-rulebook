@@ -77,7 +77,3 @@ All source code identifiers, inline comments, documentation, commit messages, an
 
 - **Code Review:** Reviewers should reject non-English additions.
 - **Linting (optional):** Configure linters (e.g. ESLint plugin) or CI checks for disallowed non-ASCII characters.
-
----
-
-_Want to contribute? See the project **CONTRIBUTING.md**._

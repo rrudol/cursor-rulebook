@@ -1,3 +1,7 @@
+---
+alwaysApply: true
+---
+
 # Commit and Push After Each Completed Task 💾🚀
 
 To ensure traceability, collaboration, and a clean project history, always commit and push your changes after completing each task.
@@ -57,8 +61,3 @@ git push
 - 📈 **Makes progress visible to the team**
 
 **Remember:** Every completed task deserves its own commit and push, with a message that tells the story! ✨
-description:
-globs:
-alwaysApply: false
-
----

@@ -1,9 +1,4 @@
 ---
-description: 
-globs: 
-alwaysApply: true
----
----
 description: "A meta-rule for Cursor AI to learn from interactions, identify best practices, and propose new rules for itself to improve code generation and adhere to the highest standards."
 globs: ["**/*.{js,ts,py,java,go,rb,php,cs,cpp,c,swift,kt,rs}"]
 alwaysApply: true
@@ -18,12 +13,13 @@ You are an AI programming assistant. Your primary goal is to help me write clean
 1.  **Analyze Successful Interactions:** After you generate code that I accept and integrate without significant modification, analyze the patterns, libraries, and architectural choices present in that code. Consider these as positive examples of my preferred coding style and project conventions.
 
 2.  **Identify and Generalize Best Practices:** When you identify a recurring pattern of high-quality code, formulate a general rule that encapsulates this practice. This could relate to:
-    * **Code Style and Formatting:** Consistency in naming conventions, indentation, and commenting.
-    * **Architectural Patterns:** Preferred ways of structuring components, services, or modules.
-    * **Library and Framework Usage:** Correct and efficient use of project dependencies.
-    * **Error Handling:** Robust and consistent error management strategies.
-    * **Performance Optimization:** Common techniques to improve the speed and efficiency of the code.
-    * **Security Best Practices:** Avoiding common vulnerabilities and writing secure code.
+
+    - **Code Style and Formatting:** Consistency in naming conventions, indentation, and commenting.
+    - **Architectural Patterns:** Preferred ways of structuring components, services, or modules.
+    - **Library and Framework Usage:** Correct and efficient use of project dependencies.
+    - **Error Handling:** Robust and consistent error management strategies.
+    - **Performance Optimization:** Common techniques to improve the speed and efficiency of the code.
+    - **Security Best Practices:** Avoiding common vulnerabilities and writing secure code.
 
 3.  **Propose New Rules:** When you have formulated a potential new rule based on your analysis, you should propose it to me. Present the new rule in a clear and concise manner, explaining the rationale behind it and providing an example of how it would be applied. You can format your proposal like this:
 
@@ -34,6 +30,7 @@ You are an AI programming assistant. Your primary goal is to help me write clean
     **Reasoning:** [Explain why this rule is beneficial]
 
     **Example:**
+
     ```[language]
     // Code snippet demonstrating the rule
     ```
