@@ -23,10 +23,17 @@ Cursor is an AI-powered code editor that can be enhanced with custom rules to en
 3. **Sync with your projects** by copying or linking the `.cursor/rules/` directory into your project root.
 4. **Enjoy automated guidance** from Cursor as you code! ✨
 
+## 📖 Documentation
+
+- **[Writing Effective Rules](docs/writing-effective-rules.md)** - Comprehensive guide on creating powerful cursor rules
+- **[Rule Templates](templates/README.md)** - Ready-to-use templates for different rule types
+- **[Installation Guide](scripts/install-rules.sh)** - Easy installation script with category options
+
 ## 🤝 Contributing
 
 Contributions are welcome! If you have a rule that could help others, please open a pull request. Make sure to:
 
 - Use **English** for all rule content (see Language Consistency Rule 🇬🇧)
-- Follow the naming and formatting conventions in `.cursor/rules/`
-- Add a clear description and examples to your rule
+- Follow the [writing guide](docs/writing-effective-rules.md) for best practices
+- Use appropriate [templates](templates/) for consistency
+- Test your rules before submitting
