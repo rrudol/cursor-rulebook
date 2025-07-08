@@ -1,0 +1,459 @@
+---
+description: Frontend development standards for React TypeScript projects with modern tooling
+globs:
+  ["**/*.tsx", "**/*.ts", "**/*.jsx", "**/*.js", "src/**/*", "components/**/*"]
+alwaysApply: false
+---
+
+# React TypeScript Frontend Standards 🌍
+
+This rule establishes comprehensive development standards for React TypeScript frontend projects using modern tooling and best practices.
+
+## Technology Stack Requirements
+
+### Core Technologies
+
+- **React**: Use latest stable version (minimum React 19)
+- **TypeScript**: Strict TypeScript configuration for type safety
+- **Tailwind CSS**: Primary styling solution using utility classes
+- **shadcn/ui**: Reusable components built on Radix and Tailwind
+- **Radix UI**: Accessible primitive components for complex UI elements
+
+### State Management
+
+- **Local State**: `useState` and `useReducer` for component-scoped state
+- **Server State**: React Query (TanStack Query) for API data management
+- **Global State**: Zustand for application-wide shared state
+- **Forms**: React Hook Form for form handling and validation
+- **Routing**: React Router for application navigation
+
+### Development Tools
+
+- **Testing**: Vitest (or Jest) + React Testing Library
+- **Linting**: ESLint configured at project level
+- **Formatting**: Prettier with Tailwind plugin for class sorting
+
+## Component Standards
+
+### Naming Conventions
+
+```typescript
+// ✅ Component files - PascalCase
+ProductCard.tsx;
+UserProfile.tsx;
+NavigationMenu.tsx;
+
+// ✅ Props interfaces - PascalCase with Props suffix
+interface ProductCardProps {
+  product: Product;
+  onSelect: (id: string) => void;
+}
+
+// ✅ Component export
+export const ProductCard: React.FC<ProductCardProps> = ({
+  product,
+  onSelect,
+}) => {
+  // Component implementation
+};
+```
+
+### Component Architecture
+
+#### Smart vs Dumb Components
+
+```typescript
+// ✅ Smart Component (Container)
+const ProductListContainer: React.FC = () => {
+  const { data: products, isLoading } = useQuery({
+    queryKey: ["products"],
+    queryFn: fetchProducts,
+  });
+
+  if (isLoading) return <LoadingSpinner />;
+
+  return <ProductList products={products} />;
+};
+
+// ✅ Dumb Component (Presentational)
+interface ProductListProps {
+  products: Product[];
+}
+
+const ProductList: React.FC<ProductListProps> = ({ products }) => {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {products.map((product) => (
+        <ProductCard key={product.id} product={product} />
+      ))}
+    </div>
+  );
+};
+```
+
+#### Single Responsibility Principle
+
+```typescript
+// ❌ Bad - Too many responsibilities
+const UserDashboard = () => {
+  // User data fetching
+  // Notifications logic
+  // Navigation state
+  // Analytics tracking
+  // UI rendering
+};
+
+// ✅ Good - Focused components
+const UserDashboard = () => {
+  return (
+    <div className="p-6">
+      <UserHeader />
+      <NotificationPanel />
+      <UserMetrics />
+      <UserActions />
+    </div>
+  );
+};
+```
+
+### Props Best Practices
+
+```typescript
+// ✅ Well-defined props interface
+interface ButtonProps {
+  variant: "primary" | "secondary" | "danger";
+  size: "sm" | "md" | "lg";
+  disabled?: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}
+
+// ❌ Too many props - consider refactoring
+interface OverloadedProps {
+  prop1: string;
+  prop2: number;
+  prop3: boolean;
+  prop4: string[];
+  prop5: object;
+  prop6: () => void;
+  prop7: string;
+  prop8: number;
+  // ... too many props
+}
+
+// ✅ Better - Use children or composition
+interface WrapperProps {
+  className?: string;
+  children: React.ReactNode;
+}
+```
+
+## Styling Standards
+
+### Tailwind CSS First
+
+```typescript
+// ✅ Utility-first styling
+const Button: React.FC<ButtonProps> = ({
+  variant,
+  size,
+  children,
+  ...props
+}) => {
+  return (
+    <button
+      className={clsx(
+        "font-medium rounded-lg transition-colors",
+        {
+          "bg-blue-600 text-white hover:bg-blue-700": variant === "primary",
+          "bg-gray-200 text-gray-900 hover:bg-gray-300":
+            variant === "secondary",
+          "bg-red-600 text-white hover:bg-red-700": variant === "danger",
+        },
+        {
+          "px-3 py-1.5 text-sm": size === "sm",
+          "px-4 py-2 text-base": size === "md",
+          "px-6 py-3 text-lg": size === "lg",
+        }
+      )}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+};
+
+// ❌ Avoid custom CSS unless absolutely necessary
+const CustomStyledComponent = () => (
+  <div style={{ backgroundColor: "#custom", padding: "16px" }}>Content</div>
+);
+```
+
+### Conditional Classes
+
+```typescript
+import clsx from "clsx";
+import { twMerge } from "tailwind-merge";
+
+// ✅ Use clsx for conditional classes
+const CardComponent = ({ isActive, className }: CardProps) => (
+  <div
+    className={clsx(
+      "p-4 rounded-lg border",
+      isActive && "bg-blue-50 border-blue-200",
+      className
+    )}
+  >
+    Content
+  </div>
+);
+
+// ✅ Use tailwind-merge for conflicting classes
+const Button = ({ className, ...props }: ButtonProps) => (
+  <button className={twMerge("px-4 py-2 bg-blue-600", className)} {...props} />
+);
+```
+
+## Testing Requirements
+
+### Unit Testing Standards
+
+```typescript
+// ✅ Test component behavior, not implementation
+import { render, screen, fireEvent } from "@testing-library/react";
+import { ProductCard } from "./ProductCard";
+
+describe("ProductCard", () => {
+  const mockProduct = {
+    id: "1",
+    name: "Test Product",
+    price: 99.99,
+  };
+
+  it("displays product information correctly", () => {
+    render(<ProductCard product={mockProduct} onSelect={jest.fn()} />);
+
+    expect(screen.getByText("Test Product")).toBeInTheDocument();
+    expect(screen.getByText("$99.99")).toBeInTheDocument();
+  });
+
+  it("calls onSelect when clicked", () => {
+    const onSelect = jest.fn();
+    render(<ProductCard product={mockProduct} onSelect={onSelect} />);
+
+    fireEvent.click(screen.getByRole("button"));
+
+    expect(onSelect).toHaveBeenCalledWith("1");
+  });
+});
+
+// ✅ Test custom hooks
+import { renderHook, act } from "@testing-library/react";
+import { useLocalStorage } from "./useLocalStorage";
+
+describe("useLocalStorage", () => {
+  it("should return initial value", () => {
+    const { result } = renderHook(() => useLocalStorage("key", "initial"));
+
+    expect(result.current[0]).toBe("initial");
+  });
+});
+```
+
+### Test Coverage Requirements
+
+- **Minimum Coverage**: >80% for new business logic
+- **Test Location**: Place test files adjacent to source files
+- **File Naming**: `ComponentName.test.tsx` or `ComponentName.spec.tsx`
+
+## File Structure and Organization
+
+### Directory Structure
+
+```
+src/
+├── components/           # Reusable UI components
+│   ├── ui/              # shadcn/ui components
+│   └── common/          # Shared components
+├── features/            # Feature-based modules
+│   ├── products/
+│   │   ├── components/  # Feature-specific components
+│   │   ├── hooks/       # Feature-specific hooks
+│   │   ├── types/       # Feature-specific types
+│   │   └── index.ts     # Feature exports
+├── hooks/               # Shared custom hooks
+├── lib/                 # Utility functions
+├── types/               # Global type definitions
+└── __tests__/           # Global test utilities
+```
+
+### Export Patterns
+
+```typescript
+// ✅ Use index.ts for clean imports
+// features/products/index.ts
+export { ProductList } from "./components/ProductList";
+export { ProductCard } from "./components/ProductCard";
+export { useProducts } from "./hooks/useProducts";
+export type { Product, ProductFilter } from "./types";
+
+// ✅ Clean imports elsewhere
+import { ProductList, useProducts } from "@/features/products";
+```
+
+## State Management Patterns
+
+### Local State
+
+```typescript
+// ✅ useState for simple state
+const [isOpen, setIsOpen] = useState(false);
+const [formData, setFormData] = useState({ name: "", email: "" });
+
+// ✅ useReducer for complex state
+const [state, dispatch] = useReducer(formReducer, initialState);
+```
+
+### Server State
+
+```typescript
+// ✅ React Query for API data
+const {
+  data: products,
+  isLoading,
+  error,
+} = useQuery({
+  queryKey: ["products", filters],
+  queryFn: () => fetchProducts(filters),
+  staleTime: 5 * 60 * 1000, // 5 minutes
+});
+
+const mutation = useMutation({
+  mutationFn: createProduct,
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ["products"] });
+  },
+});
+```
+
+### Global State
+
+```typescript
+// ✅ Zustand for global state
+interface UserStore {
+  user: User | null;
+  setUser: (user: User | null) => void;
+  theme: "light" | "dark";
+  setTheme: (theme: "light" | "dark") => void;
+}
+
+const useUserStore = create<UserStore>((set) => ({
+  user: null,
+  setUser: (user) => set({ user }),
+  theme: "light",
+  setTheme: (theme) => set({ theme }),
+}));
+```
+
+## Accessibility and Performance
+
+### Accessibility Standards
+
+```typescript
+// ✅ Semantic HTML and ARIA labels
+const NavigationMenu = () => (
+  <nav role="navigation" aria-label="Main navigation">
+    <ul className="flex space-x-4">
+      <li>
+        <button aria-label="Open menu" onClick={toggleMenu}>
+          <MenuIcon />
+        </button>
+      </li>
+    </ul>
+  </nav>
+);
+
+// ✅ Alt text for images
+const ProductImage = ({ product }: { product: Product }) => (
+  <img
+    src={product.imageUrl}
+    alt={`${product.name} product image`}
+    loading="lazy"
+    className="w-full h-48 object-cover"
+  />
+);
+```
+
+### Performance Optimization
+
+```typescript
+// ✅ Memoization when needed (not by default)
+const ExpensiveComponent = React.memo(({ data }: { data: ComplexData }) => {
+  const expensiveValue = useMemo(() => {
+    return performExpensiveCalculation(data);
+  }, [data]);
+
+  const handleClick = useCallback(() => {
+    // Expensive operation
+  }, [dependency]);
+
+  return <div>{expensiveValue}</div>;
+});
+
+// ✅ Image optimization
+const OptimizedImage = ({ src, alt }: ImageProps) => (
+  <img
+    src={src}
+    alt={alt}
+    loading="lazy"
+    decoding="async"
+    className="w-full h-auto"
+  />
+);
+```
+
+## Linting and Formatting Configuration
+
+### ESLint Configuration
+
+```json
+{
+  "extends": [
+    "@typescript-eslint/recommended",
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
+    "plugin:jsx-a11y/recommended"
+  ],
+  "rules": {
+    "react/react-in-jsx-scope": "off",
+    "@typescript-eslint/no-unused-vars": "error",
+    "jsx-a11y/alt-text": "error"
+  }
+}
+```
+
+### Prettier Configuration
+
+```json
+{
+  "plugins": ["prettier-plugin-tailwindcss"],
+  "tailwindConfig": "./tailwind.config.js",
+  "semi": true,
+  "singleQuote": true,
+  "trailingComma": "es5"
+}
+```
+
+## Motivation
+
+- 🎯 **Consistency**: Standardized patterns across all frontend projects
+- 🚀 **Performance**: Optimized bundle size and runtime performance
+- ♿ **Accessibility**: Built-in a11y support through Radix components
+- 🔧 **Maintainability**: Clear separation of concerns and testable code
+- 📚 **Developer Experience**: Type safety and modern tooling integration
+- 🎨 **Design System**: Cohesive styling through Tailwind and shadcn/ui
+
+## Related Rules
+
+- [`language_en.mdc`](../language_en.mdc) - English language consistency
+- [`task-tracking.mdc`](../../ai-behavior/task-tracking.mdc) - Task management during development
