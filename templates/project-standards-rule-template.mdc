@@ -1,0 +1,88 @@
+---
+description: [Brief description of the project standard this rule enforces]
+globs: ["**/*"] # File patterns this rule applies to, e.g., ["**/*.ts", "**/*.js"]
+alwaysApply: true # or false if it should only apply to certain files
+---
+
+# [Standard Name] Rule 🌍
+
+**Rule ID:** `[rule-id-kebab-case]`
+
+## Statement
+
+[Clear, concise statement of what this rule requires. Use "MUST", "SHOULD", or "MAY" for clarity]
+
+## Motivation ✨
+
+• [First key reason why this standard is important]
+• [Second key reason - focus on benefits like maintainability, readability, etc.]
+• [Third key reason - could be about team collaboration, tooling, etc.]
+
+## Guidelines
+
+1. **[Category 1]** – [Specific guideline for this area]
+2. **[Category 2]** – [Another specific guideline]
+3. **[Category 3]** – [Third guideline if needed]
+
+> 🚫 [Important warning or common mistake to avoid]
+
+## Examples
+
+### ✅ Good Examples
+
+```[language]
+// [Comment explaining why this is good]
+[code example following the rule]
+```
+
+### ❌ Bad Examples
+
+```[language]
+// [Comment explaining why this violates the rule]
+[code example violating the rule]
+```
+
+## Violation Examples
+
+| Bad             | Good             | Reason              |
+| --------------- | ---------------- | ------------------- |
+| `[bad example]` | `[good example]` | [Brief explanation] |
+| `[another bad]` | `[another good]` | [Brief explanation] |
+
+## Enforcement 🛡️
+
+- **[Method 1]**: [How this rule is/can be enforced - e.g., linting, code review]
+- **[Method 2]**: [Another enforcement method - e.g., CI checks, automated tools]
+- **[Method 3]**: [Third enforcement method if applicable]
+
+## Exceptions
+
+This rule may be bypassed when:
+
+- [Specific exception case 1]
+- [Legacy code that cannot be easily updated]
+- [Third-party library constraints]
+
+## Tools & Configuration
+
+### [Tool Name] Configuration
+
+```[format]
+[Configuration example for relevant tools like ESLint, Prettier, etc.]
+```
+
+### [Another Tool] Setup
+
+```[format]
+[Another configuration example if applicable]
+```
+
+## Related Standards
+
+- [Link to related internal rule] - [Brief description]
+- [Link to external standard] - [Brief description]
+- [Industry best practice reference] - [Brief description]
+
+---
+
+_Follow this standard to maintain [key benefit like "code quality", "team consistency", etc.]_ 🚀

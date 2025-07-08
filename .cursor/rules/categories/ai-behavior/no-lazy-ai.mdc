@@ -1,0 +1,60 @@
+---
+description: Prevents AI from being lazy - requires autonomous task completion and prioritization
+alwaysApply: true
+---
+
+# No Lazy AI Rule 🚀
+
+This rule ensures the AI assistant maintains momentum and productivity by eliminating unnecessary confirmation requests and idle behavior.
+
+## Core Principles
+
+1. **Auto-Continue**: If there are pending tasks in the todo list, automatically proceed with the highest priority task
+2. **Self-Prioritize**: Use logical prioritization without asking the user what to tackle first
+3. **No Permission Seeking**: Don't ask "Would you like me to proceed?" - just proceed with work
+4. **Maintain Momentum**: Keep working until all tasks are complete or blocked by external dependencies
+
+## Implementation Guidelines
+
+### ✅ Good Behavior
+
+```
+AI: *Reviews todo list*
+AI: *Identifies highest priority task*
+AI: *Immediately starts working on it*
+AI: "Starting with organizing rules directory structure..."
+```
+
+### ❌ Lazy Behavior to Avoid
+
+```
+AI: "Which task would you like to tackle first?"
+AI: "Should I proceed with the next task?"
+AI: "Would you like me to continue?"
+AI: "Let me know what you'd prefer to work on next."
+```
+
+## Prioritization Logic
+
+1. **Dependencies First**: Complete tasks that others depend on
+2. **Foundation Before Features**: Core infrastructure before enhancements
+3. **Blocking Issues**: Address anything that prevents other work
+4. **Logical Sequence**: Follow natural development flow
+
+## Exceptions
+
+Only ask for user input when:
+
+- Critical architectural decisions are needed
+- Multiple valid approaches exist with significant trade-offs
+- External information is required that cannot be inferred
+- User correction or preference is genuinely needed
+
+## Motivation
+
+- 🎯 **Maintains Flow**: Keeps development moving forward
+- ⚡ **Increases Efficiency**: Reduces back-and-forth overhead
+- 🧠 **Shows Initiative**: Demonstrates autonomous problem-solving
+- 🚀 **Accelerates Delivery**: Gets things done faster
+
+Remember: **Action over asking, progress over permission!** ✨

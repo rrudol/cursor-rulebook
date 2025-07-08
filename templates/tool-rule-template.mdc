@@ -1,0 +1,143 @@
+---
+description: [Brief description of what tool or workflow this rule configures]
+globs: ["**/*"] # File patterns where this applies, e.g., ["package.json", "**/*.js"]
+alwaysApply: false # Usually false for tool-specific rules
+---
+
+# [Tool Name] Configuration Rule 🛠️
+
+This rule establishes standards and best practices for using [Tool Name] in projects.
+
+## Tool Overview
+
+**[Tool Name]** is [brief description of what the tool does and why it's used].
+
+## Configuration Requirements
+
+### Required Setup
+
+1. **Installation**: [How to install the tool]
+
+   ```bash
+   [installation command]
+   ```
+
+2. **Configuration**: [Required configuration files]
+
+   ```[format]
+   [example configuration]
+   ```
+
+3. **Scripts**: [Required package.json scripts or equivalent]
+   ```json
+   {
+     "scripts": {
+       "[script-name]": "[command]"
+     }
+   }
+   ```
+
+## Usage Guidelines
+
+### ✅ Preferred Practices
+
+- **[Practice 1]**: [Description and reasoning]
+- **[Practice 2]**: [Description and reasoning]
+- **[Practice 3]**: [Description and reasoning]
+
+### ❌ Avoid These Patterns
+
+- **[Anti-pattern 1]**: [What not to do and why]
+- **[Anti-pattern 2]**: [Another thing to avoid]
+
+## Command Reference
+
+### Common Commands
+
+```bash
+# [Description of what this does]
+[tool-name] [command] [flags]
+
+# [Description of another common task]
+[tool-name] [another-command] [flags]
+```
+
+### Project-Specific Commands
+
+```bash
+# [Project-specific workflow]
+[command with project context]
+```
+
+## File Structure Requirements
+
+```
+project-root/
+├── [config-file]           # [Description]
+├── [another-config]        # [Description]
+└── [directory]/
+    └── [tool-specific-files]
+```
+
+## Integration with Other Tools
+
+### [Related Tool 1]
+
+[How this tool integrates with other tools in the stack]
+
+### [Related Tool 2]
+
+[Another integration consideration]
+
+## Troubleshooting
+
+### Common Issues
+
+#### Issue: [Common problem]
+
+**Symptoms**: [How to recognize this issue]
+**Solution**: [How to fix it]
+
+```bash
+[command to resolve]
+```
+
+#### Issue: [Another common problem]
+
+**Symptoms**: [Recognition]
+**Solution**: [Fix]
+
+## Performance Considerations
+
+- **[Optimization 1]**: [How to optimize usage]
+- **[Optimization 2]**: [Another performance tip]
+- **[Best Practice]**: [Performance-related best practice]
+
+## Version Requirements
+
+- **Minimum Version**: [X.Y.Z]
+- **Recommended Version**: [X.Y.Z]
+- **Known Issues**: [Any version-specific problems to avoid]
+
+## Examples
+
+### Basic Project Setup
+
+```[format]
+[Example of basic setup for new project]
+```
+
+### Advanced Configuration
+
+```[format]
+[Example of advanced/complex setup]
+```
+
+## Related Rules
+
+- [`related-tool-rule.mdc`](./related-tool-rule.mdc) - [Brief description]
+- [`dependency-rule.mdc`](./dependency-rule.mdc) - [Brief description]
+
+---
+
+_Use [Tool Name] consistently to maintain [key benefit like "build reliability", "dependency management", etc.]_ ⚡

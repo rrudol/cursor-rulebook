@@ -1,0 +1,75 @@
+---
+description: [Brief description of what this rule does for AI behavior]
+globs: ["**/*"] # or specific file patterns
+alwaysApply: true # or false if it should only apply to certain files
+---
+
+# [Rule Name] 🤖
+
+[Brief explanation of the rule's purpose and what behavior it enforces or prevents]
+
+## Core Principles
+
+1. **[Principle 1]**: [Description of key behavior requirement]
+2. **[Principle 2]**: [Description of another key requirement]
+3. **[Principle 3]**: [Description of third requirement if needed]
+
+## Implementation Guidelines
+
+### ✅ Good Behavior
+
+```
+[Example of desired AI behavior]
+AI: [Shows what the AI should do in this scenario]
+```
+
+### ❌ Bad Behavior to Avoid
+
+```
+[Example of behavior this rule prevents]
+AI: [Shows what the AI should NOT do]
+```
+
+## Specific Rules
+
+- **[Rule Category]**: [Specific guideline or requirement]
+- **[Another Category]**: [Another specific guideline]
+- **[Exception Handling]**: [How to handle edge cases]
+
+## Examples
+
+### Scenario 1: [Description]
+
+**Situation**: [Context of when this rule applies]
+**Expected Behavior**: [What the AI should do]
+**Rationale**: [Why this behavior is preferred]
+
+### Scenario 2: [Description]
+
+**Situation**: [Another context]
+**Expected Behavior**: [What the AI should do]
+**Rationale**: [Why this behavior is preferred]
+
+## Exceptions
+
+This rule may be bypassed when:
+
+- [Specific exception case 1]
+- [Specific exception case 2]
+- [User explicitly requests different behavior]
+
+## Motivation
+
+- 🎯 **[Benefit 1]**: [Explanation of key benefit]
+- ⚡ **[Benefit 2]**: [Another key benefit]
+- 🧠 **[Benefit 3]**: [Third benefit]
+- 🚀 **[Benefit 4]**: [Fourth benefit]
+
+## Related Rules
+
+- [`related-rule-1.mdc`](./related-rule-1.mdc) - [Brief description]
+- [`related-rule-2.mdc`](./related-rule-2.mdc) - [Brief description]
+
+---
+
+_Remember: [Key takeaway or motto for this rule]_ ✨
