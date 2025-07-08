@@ -1,0 +1,192 @@
+# No Blocking Development Scripts Rule 🚫⏳
+
+**Rule ID:** `dev-scripts-001`
+
+## Statement
+
+**NEVER** run long-running or blocking development scripts that require user interaction or keep servers running indefinitely. Instead, use build commands and analyze their output for troubleshooting and development assistance.
+
+## Motivation ✨
+
+• Prevents blocking execution that halts the AI assistant's workflow 🔄  
+• Enables proper analysis of build outputs and errors 📊  
+• Maintains productive development flow without manual intervention 🚀  
+• Allows for automated problem detection and resolution 🔧
+
+## Prohibited Commands ❌
+
+### Development Servers
+
+```bash
+# ❌ NEVER run these commands
+pnpm dev
+npm run dev
+yarn dev
+npm start
+pnpm start
+yarn start
+
+# ❌ Other blocking commands
+pnpm run serve
+npm run watch
+yarn watch
+nodemon
+```
+
+### Interactive Commands
+
+```bash
+# ❌ Commands requiring user input
+npx create-*
+npm init
+pnpm create
+yarn create
+```
+
+## Recommended Alternatives ✅
+
+### Instead of Development Servers
+
+```bash
+# ✅ Build and analyze output
+pnpm run build
+npm run build
+yarn build
+
+# ✅ Type checking
+pnpm run type-check
+tsc --noEmit
+
+# ✅ Linting
+pnpm run lint
+eslint src/
+```
+
+### For Analysis and Troubleshooting
+
+```bash
+# ✅ Dependency analysis
+pnpm list
+npm ls
+pnpm audit
+
+# ✅ Test execution
+pnpm test
+npm test
+yarn test
+
+# ✅ Production preview (if quick)
+pnpm run preview --timeout 5000
+```
+
+## Implementation Guidelines 🛡️
+
+### When User Requests Development Server
+
+1. **Explain the limitation** - clarify why we can't run blocking commands
+2. **Suggest alternatives** - offer build/test commands that provide similar insights
+3. **Analyze build output** - examine compilation errors, warnings, and metrics
+4. **Provide specific guidance** - based on build results, suggest concrete fixes
+
+### Example Response Pattern
+
+```markdown
+I understand you'd like to see the development server, but I'll run the build
+command instead to analyze any issues:
+
+`pnpm run build`
+
+[Analyze build output and provide specific recommendations]
+
+If you need to run the dev server manually, you can use: `pnpm dev`
+```
+
+### Background Process Exception
+
+If a command absolutely must run in the background:
+
+```bash
+# ✅ Only when explicitly required and with timeout
+timeout 30s pnpm run build:watch &
+```
+
+## Code Review Guidelines 👀
+
+### What to Look For
+
+- **Check scripts** - Review package.json scripts for blocking behavior
+- **Build configuration** - Ensure build processes are optimized and non-blocking
+- **CI/CD compatibility** - Verify commands work in automated environments
+
+### Development Workflow
+
+```bash
+# ✅ Recommended development workflow
+1. pnpm install          # Install dependencies
+2. pnpm run build        # Build project
+3. pnpm run lint         # Check code quality
+4. pnpm run test         # Run tests
+5. # Analyze results and provide feedback
+```
+
+## Exception Cases 🔓
+
+### When Background Execution is Acceptable
+
+- **Explicit user request** with understanding of blocking nature
+- **Time-limited operations** with appropriate timeouts
+- **Non-essential monitoring** that doesn't block primary workflow
+
+### How to Handle Exceptions
+
+```bash
+# ✅ Proper background execution with safeguards
+nohup pnpm run build:watch > build.log 2>&1 &
+sleep 5  # Allow process to start
+kill %1  # Terminate after analysis
+```
+
+## Error Handling 🔧
+
+### When Build Commands Fail
+
+1. **Capture full output** - preserve error messages and warnings
+2. **Identify root causes** - analyze dependency, syntax, or configuration issues
+3. **Provide specific fixes** - offer concrete solutions based on error patterns
+4. **Suggest verification steps** - recommend commands to verify fixes
+
+### Common Build Issues and Solutions
+
+```bash
+# ✅ Dependency issues
+pnpm install --frozen-lockfile
+npm ci
+
+# ✅ Type errors
+tsc --noEmit --strict
+
+# ✅ Lint issues
+eslint . --fix
+prettier --write .
+```
+
+## Related Guidelines 📚
+
+- Use `git status` and `git diff` for understanding changes
+- Prefer `cat package.json` over running package scripts
+- Use `ls -la` for directory structure analysis
+- Check `pnpm list` for dependency verification
+
+## Motivation Summary 🎯
+
+- **Maintains workflow continuity** - no hanging processes ⚡
+- **Enables proper analysis** - build outputs provide rich debugging info 📈
+- **Supports automation** - commands work in CI/CD environments 🤖
+- **Prevents frustration** - no need to manually terminate blocked processes 😌
+
+Remember: **Build, analyze, and guide - don't block and wait!** 🚀✨
+description:
+globs:
+alwaysApply: false
+
+---
