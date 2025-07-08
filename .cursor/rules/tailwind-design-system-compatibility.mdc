@@ -1,0 +1,184 @@
+# Tailwind CSS & Design System Compatibility Rule 🎨
+
+**Rule ID:** `tailwind-design-system-001`
+
+## Statement
+
+When using external design systems that depend on Tailwind CSS, **ALWAYS** ensure proper Tailwind CSS configuration and version compatibility in the main project.
+
+## The Problem We're Preventing 🚫
+
+External design systems (like `@rrudol/design-system`) often use Tailwind CSS classes internally. If the main project doesn't have Tailwind CSS properly configured, styles won't apply even though components render correctly.
+
+## Critical Checklist ✅
+
+### 1. Design System Analysis
+
+Before integrating any design system:
+
+```bash
+# Check if design system uses Tailwind CSS
+pnpm list --depth=1 | grep tailwind
+# or examine package.json of the design system
+```
+
+### 2. Tailwind CSS Version Compatibility
+
+**ALWAYS use Tailwind CSS v3.x for maximum compatibility:**
+
+```bash
+# ✅ GOOD - Use stable v3
+pnpm add -D tailwindcss@3.4.0 autoprefixer postcss
+
+# ❌ BAD - Avoid v4 (experimental, plugin compatibility issues)
+pnpm add -D tailwindcss@4.x.x
+```
+
+### 3. Required Configuration Files
+
+When design system uses Tailwind, create these files:
+
+**tailwind.config.js:**
+
+```javascript
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+    // ⚠️ CRITICAL: Include design system paths
+    "./node_modules/@your-org/design-system/dist/**/*.{js,jsx,ts,tsx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+};
+```
+
+**postcss.config.js:**
+
+```javascript
+export default {
+  plugins: {
+    // ⚠️ Use standard plugin name, not @tailwindcss/postcss
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+};
+```
+
+**src/index.css:**
+
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
+### 4. Build Verification
+
+After configuration, **ALWAYS verify:**
+
+```bash
+# 1. Build should succeed
+pnpm run build
+
+# 2. Check if Tailwind CSS is generating styles
+# Look for Tailwind classes in generated CSS files in dist/
+grep -r "bg-\|text-\|p-\|m-\|flex\|grid" dist/assets/*.css
+```
+
+### 5. Component Testing Pattern
+
+When implementing design system components:
+
+```typescript
+// ✅ Test with Tailwind classes to verify configuration
+const TestComponent = () => (
+  <div className="bg-blue-500 text-white p-4">
+    <DesignSystemComponent />
+    {/* If background is blue, Tailwind works! */}
+  </div>
+);
+```
+
+## Warning Signs 🚨
+
+Stop and check Tailwind configuration if you see:
+
+- ❌ Design system components render but have no styling
+- ❌ Build fails with PostCSS/Tailwind errors
+- ❌ Console warnings about missing CSS classes
+- ❌ Components look unstyled despite being imported correctly
+
+## Quick Fix Commands 🔧
+
+```bash
+# Remove problematic Tailwind v4
+pnpm remove tailwindcss @tailwindcss/postcss
+
+# Install stable v3
+pnpm add -D tailwindcss@3.4.0 autoprefixer postcss
+
+# Verify installation
+pnpm run build
+```
+
+## PostCSS Plugin Compatibility 🔌
+
+**ALWAYS use standard plugin names:**
+
+```javascript
+// ✅ CORRECT
+export default {
+  plugins: {
+    tailwindcss: {},  // Standard plugin
+    autoprefixer: {},
+  },
+}
+
+// ❌ WRONG (v4 experimental syntax)
+export default {
+  plugins: {
+    "@tailwindcss/postcss": {},  // Causes compatibility issues
+    autoprefixer: {},
+  },
+}
+```
+
+## Design System Integration Workflow 📋
+
+1. **Analyze design system dependencies**
+2. **Install Tailwind CSS v3.x in main project**
+3. **Configure tailwind.config.js with design system paths**
+4. **Set up PostCSS with standard plugins**
+5. **Add Tailwind directives to CSS**
+6. **Verify build succeeds**
+7. **Test component styling**
+
+## Motivation 💡
+
+- 🎯 **Prevents styling issues** before they occur
+- ⚡ **Saves debugging time** on configuration problems
+- 🔄 **Ensures compatibility** between main project and design systems
+- 📋 **Standardizes setup** process for external design systems
+
+## Related Issues
+
+This rule prevents:
+
+- Components rendering without styles
+- PostCSS build failures
+- Tailwind version compatibility issues
+- Missing CSS class generation
+- Design system integration problems
+
+---
+
+**Remember**: External design systems + Tailwind CSS = Main project MUST have Tailwind configured! 🎨✨
+description:
+globs:
+alwaysApply: false
+
+---
