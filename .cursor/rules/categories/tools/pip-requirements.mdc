@@ -1,18 +1,42 @@
 ---
-description: Use it whenever doing any changes in Python code
+description: Ensures Python dependencies are properly tracked in requirements.txt
+globs: ["**/*.py", "requirements.txt", "setup.py", "pyproject.toml"]
 alwaysApply: false
 ---
 
-# Python Dependency Management
+# Python Dependency Management 🛠️
 
 All dependencies installed via pip must be automatically added to the requirements.txt file.
 
 ## Rules
 
 1. **After each package installation via pip**: Update requirements.txt
-
 2. **Before making changes**:
    - Check if new imports require package installation
    - If so, install them and update requirements.txt
 
-Each of these packages must be added to requirements.txt after installation.
+## Examples
+
+### ✅ Good Workflow
+
+```bash
+# Install package
+pip install requests
+
+# Update requirements
+pip freeze > requirements.txt
+```
+
+### ❌ Bad Practice
+
+```bash
+# Install package but forget to update requirements
+pip install requests
+# (missing requirements.txt update)
+```
+
+## Motivation
+
+- 🔒 **Reproducibility**: Ensures consistent environments
+- 📦 **Dependency Tracking**: All required packages are documented
+- 🤝 **Team Collaboration**: Easy setup for other developers

@@ -1,51 +1,62 @@
 ---
-description: when nodejs package manager has to be used (like npm, yarn or pnpm
+description: Configure pnpm as the preferred Node.js package manager
+globs: ["package.json", "**/*.js", "**/*.ts", "**/*.jsx", "**/*.tsx"]
 alwaysApply: false
 ---
 
+# PNPM Package Manager Rule 🛠️
+
 Always use pnpm as the package manager. Do not use npm or yarn. For executing packages from the registry, use pnpm dlx instead of npx.
 
-Specific Command Replacements:
+## Specific Command Replacements
 
-+----------------------------+-------------------------+
-| Instead of... | Use... |
-+----------------------------+-------------------------+
-| npm install | pnpm install |
-| npm install <package> | pnpm add <package> |
-| npm install -D <package> | pnpm add -D <package> |
-| npm run <script> | pnpm <script> |
-| npx <command> | pnpm dlx <command> |
-+----------------------------+-------------------------+
+| Instead of...              | Use...                  |
+| -------------------------- | ----------------------- |
+| `npm install`              | `pnpm install`          |
+| `npm install <package>`    | `pnpm add <package>`    |
+| `npm install -D <package>` | `pnpm add -D <package>` |
+| `npm run <script>`         | `pnpm <script>`         |
+| `npx <command>`            | `pnpm dlx <command>`    |
 
-Eksportuj do Arkuszy
-Examples:
+## Examples
 
-Installing all project dependencies:
+### ✅ Good Examples
 
-Don't: npm install
+```bash
+# Installing all project dependencies
+pnpm install
 
-Do: pnpm install
+# Adding a new dependency
+pnpm add react
 
-Adding a new dependency:
+# Adding a development dependency
+pnpm add -D tailwindcss
 
-Don't: npm install react
+# Running a script from package.json
+pnpm dev
 
-Do: pnpm add react
+# Executing a package binary from the registry
+pnpm dlx shadcn-ui@latest init
+```
 
-Adding a new development dependency:
+### ❌ Bad Examples
 
-Don't: npm install -D tailwindcss
+```bash
+# Don't use npm
+npm install
+npm install react
+npm run dev
+npx create-react-app
 
-Do: pnpm add -D tailwindcss
+# Don't use yarn
+yarn install
+yarn add react
+yarn dev
+```
 
-Running a script from package.json:
+## Motivation
 
-Don't: npm run dev
-
-Do: pnpm dev
-
-Executing a package binary from the registry:
-
-Don't: npx shadcn-ui@latest init
-
-Do: pnpm dlx shadcn-ui@latest init
+- 🚀 **Performance**: pnpm is faster than npm and yarn
+- 💾 **Disk Efficiency**: Shared dependency storage saves space
+- 🔒 **Security**: Better handling of peer dependencies
+- 🎯 **Consistency**: Standardized across all projects

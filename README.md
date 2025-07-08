@@ -31,9 +31,11 @@ Cursor is an AI-powered code editor that can be enhanced with custom rules to en
 
 ## 🤝 Contributing
 
-Contributions are welcome! If you have a rule that could help others, please open a pull request. Make sure to:
+Contributions are welcome! We'd love to have your cursor rules in the collection. Please see our [Contributing Guide](CONTRIBUTING.md) for detailed instructions.
+
+**Quick Start**:
 
 - Use **English** for all rule content (see Language Consistency Rule 🇬🇧)
 - Follow the [writing guide](docs/writing-effective-rules.md) for best practices
 - Use appropriate [templates](templates/) for consistency
-- Test your rules before submitting
+- Test your rules with `./scripts/validate-rules.sh` before submitting
