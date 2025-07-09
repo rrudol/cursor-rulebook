@@ -17,12 +17,9 @@ readonly SCRIPT_NAME="install-cursor-rules-cli"
 readonly VERSION="1.0.0"
 readonly CLI_TOOL_NAME="copy-cursor-rules"
 
-# Default installation paths (in order of preference)
-readonly DEFAULT_INSTALL_PATHS=(
-    "/usr/local/bin"
-    "$HOME/.local/bin"
-    "$HOME/bin"
-)
+# Default installation path
+readonly DEFAULT_INSTALL_DIR="$HOME/.local/bin"
+readonly SHELL_CONFIG_FILE="$HOME/.zshrc"
 
 # Help text
 show_help() {
@@ -33,31 +30,32 @@ ${YELLOW}USAGE:${NC}
     ${SCRIPT_NAME} [OPTIONS] [INSTALL_PATH]
 
 ${YELLOW}DESCRIPTION:${NC}
-    Installs the copy-cursor-rules CLI tool to system PATH so you can use it 
-    from anywhere in your terminal.
+    Installs the copy-cursor-rules CLI tool to ~/.local/bin and adds it to your 
+    ~/.zshrc file so you can use it from anywhere in your terminal.
 
 ${YELLOW}OPTIONS:${NC}
     -h, --help          Show this help message
     -v, --version       Show version information
     -f, --force         Force installation even if tool already exists
-    -u, --uninstall     Uninstall the CLI tool instead of installing
+    -u, --uninstall     Uninstall the CLI tool and remove from ~/.zshrc
     --dry-run          Show what would be done without actually doing it
-    --list-paths       List potential installation paths
+    --no-shell-config  Skip modifying ~/.zshrc (manual PATH setup required)
 
 ${YELLOW}ARGUMENTS:${NC}
-    INSTALL_PATH        Custom installation path (must be in PATH)
+    INSTALL_PATH        Custom installation path (default: ~/.local/bin)
 
 ${YELLOW}EXAMPLES:${NC}
-    ${SCRIPT_NAME}                    # Install to default location
+    ${SCRIPT_NAME}                    # Install to ~/.local/bin and update ~/.zshrc
     ${SCRIPT_NAME} /usr/local/bin     # Install to specific location
     ${SCRIPT_NAME} --dry-run          # Preview installation
-    ${SCRIPT_NAME} --uninstall        # Remove installation
-    ${SCRIPT_NAME} --list-paths       # Show potential install locations
+    ${SCRIPT_NAME} --uninstall        # Remove installation and clean ~/.zshrc
+    ${SCRIPT_NAME} --no-shell-config  # Install without modifying ~/.zshrc
 
 ${YELLOW}NOTES:${NC}
-    • Script will try default paths in order: /usr/local/bin, ~/.local/bin, ~/bin
-    • You may need sudo for system-wide installation (/usr/local/bin)
-    • Make sure the install path is in your \$PATH environment variable
+    • Default installation: ~/.local/bin (created if it doesn't exist)
+    • Automatically adds directory to PATH in ~/.zshrc
+    • Restart terminal or run 'source ~/.zshrc' after installation
+    • Safe to run multiple times - won't create duplicate PATH entries
 
 ${YELLOW}EXIT CODES:${NC}
     0    Success
@@ -65,7 +63,6 @@ ${YELLOW}EXIT CODES:${NC}
     2    Invalid arguments
     3    Source file not found
     4    Permission denied
-    5    Install path not in PATH
 
 EOF
 }
@@ -92,19 +89,85 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
-# Check if a path is in PATH environment variable
-path_in_env() {
+# Check if a path is already in shell config file
+path_in_shell_config() {
     local check_path="$1"
-    local normalized_path="$(realpath "$check_path" 2>/dev/null || echo "$check_path")"
+    local config_file="$2"
     
-    echo "$PATH" | tr ':' '\n' | while read -r path_entry; do
-        local normalized_entry="$(realpath "$path_entry" 2>/dev/null || echo "$path_entry")"
-        if [[ "$normalized_entry" == "$normalized_path" ]]; then
-            return 0
-        fi
-    done
+    if [[ ! -f "$config_file" ]]; then
+        return 1
+    fi
     
-    return 1
+    # Check for exact path matches in export PATH statements
+    grep -q "export PATH.*${check_path}" "$config_file" || \
+    grep -q "PATH.*${check_path}" "$config_file"
+}
+
+# Add path to shell config file
+add_path_to_shell_config() {
+    local install_path="$1"
+    local config_file="$2"
+    local dry_run="${3:-0}"
+    
+    if path_in_shell_config "$install_path" "$config_file"; then
+        log_info "Path already exists in $config_file"
+        return 0
+    fi
+    
+    local path_export="export PATH=\"$install_path:\$PATH\""
+    
+    if [[ "$dry_run" == "1" ]]; then
+        log_info "Would add to $config_file: $path_export"
+        return 0
+    fi
+    
+    # Create config file if it doesn't exist
+    if [[ ! -f "$config_file" ]]; then
+        touch "$config_file"
+    fi
+    
+    # Add the path export with a comment
+    {
+        echo ""
+        echo "# Added by cursor-rules-cli installer"
+        echo "$path_export"
+    } >> "$config_file"
+    
+    log_success "Added $install_path to $config_file"
+}
+
+# Remove path from shell config file
+remove_path_from_shell_config() {
+    local install_path="$1"
+    local config_file="$2"
+    local dry_run="${3:-0}"
+    
+    if [[ ! -f "$config_file" ]]; then
+        return 0
+    fi
+    
+    if ! path_in_shell_config "$install_path" "$config_file"; then
+        log_info "Path not found in $config_file"
+        return 0
+    fi
+    
+    if [[ "$dry_run" == "1" ]]; then
+        log_info "Would remove path entries from $config_file"
+        return 0
+    fi
+    
+    # Create a temporary file to store the cleaned config
+    local temp_file="$(mktemp)"
+    
+    # Remove lines containing the install path and the comment
+    grep -v "# Added by cursor-rules-cli installer" "$config_file" | \
+    grep -v "export PATH.*${install_path}" | \
+    grep -v "PATH.*${install_path}" > "$temp_file"
+    
+    # Replace the original file
+    mv "$temp_file" "$config_file"
+    
+    log_success "Removed $install_path from $config_file"
 }
 
 # Find the source CLI script
@@ -134,70 +197,7 @@ find_source_script() {
     return 1
 }
 
-# Find the best installation path
-find_install_path() {
-    for path in "${DEFAULT_INSTALL_PATHS[@]}"; do
-        # Expand tilde
-        local expanded_path="${path/#\~/$HOME}"
-        
-        # Check if directory exists and is writable
-        if [[ -d "$expanded_path" && -w "$expanded_path" ]]; then
-            # Check if it's in PATH
-            if path_in_env "$expanded_path"; then
-                echo "$expanded_path"
-                return 0
-            else
-                log_warn "Directory $expanded_path exists but is not in PATH"
-            fi
-        elif [[ ! -d "$expanded_path" ]]; then
-            # Try to create the directory
-            if mkdir -p "$expanded_path" 2>/dev/null; then
-                if path_in_env "$expanded_path"; then
-                    echo "$expanded_path"
-                    return 0
-                else
-                    log_warn "Created directory $expanded_path but it's not in PATH"
-                fi
-            fi
-        fi
-    done
-    
-    return 1
-}
 
-# List potential installation paths
-list_paths() {
-    echo -e "${BLUE}Potential installation paths:${NC}"
-    echo
-    
-    for path in "${DEFAULT_INSTALL_PATHS[@]}"; do
-        local expanded_path="${path/#\~/$HOME}"
-        local status=""
-        local in_path=""
-        
-        if [[ -d "$expanded_path" ]]; then
-            if [[ -w "$expanded_path" ]]; then
-                status="${GREEN}✓ exists, writable${NC}"
-            else
-                status="${YELLOW}⚠ exists, not writable${NC}"
-            fi
-        else
-            status="${RED}✗ does not exist${NC}"
-        fi
-        
-        if path_in_env "$expanded_path"; then
-            in_path="${GREEN}✓ in PATH${NC}"
-        else
-            in_path="${RED}✗ not in PATH${NC}"
-        fi
-        
-        printf "  %-25s %s | %s\n" "$path" "$status" "$in_path"
-    done
-    
-    echo
-    echo -e "${YELLOW}Current PATH:${NC}"
-    echo "$PATH" | tr ':' '\n' | sed 's/^/  /'
-}
 
 # Install the CLI tool
 install_cli() {
@@ -205,6 +205,7 @@ install_cli() {
     local install_path="$2"
     local force="${3:-0}"
     local dry_run="${4:-0}"
+    local modify_shell_config="${5:-1}"
     
     local target_file="$install_path/$CLI_TOOL_NAME"
     
@@ -216,9 +217,22 @@ install_cli() {
     fi
     
     if [[ "$dry_run" == "1" ]]; then
+        log_info "Would create directory: $install_path"
         log_info "Would copy $source_script -> $target_file"
         log_info "Would make executable: $target_file"
+        if [[ "$modify_shell_config" == "1" ]]; then
+            add_path_to_shell_config "$install_path" "$SHELL_CONFIG_FILE" "1"
+        fi
         return 0
+    fi
+    
+    # Create install directory if it doesn't exist
+    if [[ ! -d "$install_path" ]]; then
+        log_info "Creating directory: $install_path"
+        if ! mkdir -p "$install_path"; then
+            log_error "Failed to create directory: $install_path"
+            return 1
+        fi
     fi
     
     # Copy the script
@@ -236,75 +250,82 @@ install_cli() {
     fi
     
     log_success "CLI tool installed successfully!"
-    log_info "You can now use: $CLI_TOOL_NAME --help"
     
-    # Verify installation
-    if command_exists "$CLI_TOOL_NAME"; then
-        log_success "Verification: $CLI_TOOL_NAME is now available in PATH"
+    # Modify shell configuration if requested
+    if [[ "$modify_shell_config" == "1" ]]; then
+        add_path_to_shell_config "$install_path" "$SHELL_CONFIG_FILE" "0"
+        log_info "You can now use: $CLI_TOOL_NAME --help"
+        log_warn "Restart your terminal or run: source ~/.zshrc"
     else
-        log_warn "Installation complete but $CLI_TOOL_NAME not found in PATH"
-        log_warn "You may need to restart your terminal or run: source ~/.bashrc"
+        log_info "You can now use: $CLI_TOOL_NAME --help (if $install_path is in PATH)"
     fi
 }
 
 # Uninstall the CLI tool
 uninstall_cli() {
     local dry_run="${1:-0}"
+    local install_path="${2:-$DEFAULT_INSTALL_DIR}"
     local found=0
     
-    # Look for installations in all potential paths
-    for path in "${DEFAULT_INSTALL_PATHS[@]}"; do
-        local expanded_path="${path/#\~/$HOME}"
-        local target_file="$expanded_path/$CLI_TOOL_NAME"
-        
-        if [[ -f "$target_file" ]]; then
+    # Expand tilde in install path
+    install_path="${install_path/#\~/$HOME}"
+    local target_file="$install_path/$CLI_TOOL_NAME"
+    
+    # Remove the CLI tool file
+    if [[ -f "$target_file" ]]; then
+        found=1
+        if [[ "$dry_run" == "1" ]]; then
+            log_info "Would remove: $target_file"
+        else
+            log_info "Removing: $target_file"
+            if rm -f "$target_file"; then
+                log_success "Removed: $target_file"
+            else
+                log_error "Failed to remove: $target_file"
+            fi
+        fi
+    fi
+    
+    # Also check if it's available via which (in case of multiple installations)
+    if command_exists "$CLI_TOOL_NAME"; then
+        local which_path="$(which "$CLI_TOOL_NAME")"
+        if [[ "$which_path" != "$target_file" ]]; then
             found=1
             if [[ "$dry_run" == "1" ]]; then
-                log_info "Would remove: $target_file"
+                log_info "Would remove: $which_path"
             else
-                log_info "Removing: $target_file"
-                if rm -f "$target_file"; then
-                    log_success "Removed: $target_file"
+                log_info "Removing additional installation: $which_path"
+                if rm -f "$which_path"; then
+                    log_success "Removed: $which_path"
                 else
-                    log_error "Failed to remove: $target_file"
+                    log_error "Failed to remove: $which_path"
                 fi
             fi
         fi
-    done
-    
-    # Also check if it's available via which
-    if command_exists "$CLI_TOOL_NAME"; then
-        local which_path="$(which "$CLI_TOOL_NAME")"
-        if [[ "$dry_run" == "1" ]]; then
-            log_info "Would remove: $which_path"
-        else
-            log_info "Removing: $which_path"
-            if rm -f "$which_path"; then
-                log_success "Removed: $which_path"
-            else
-                log_error "Failed to remove: $which_path"
-            fi
-        fi
-        found=1
     fi
+    
+    # Remove from shell configuration
+    remove_path_from_shell_config "$install_path" "$SHELL_CONFIG_FILE" "$dry_run"
     
     if [[ "$found" == "0" ]]; then
         log_warn "No installation found to remove"
+        # Still try to clean shell config in case it exists
         return 1
     fi
     
     if [[ "$dry_run" == "0" ]]; then
         log_success "Uninstallation complete"
+        log_warn "Restart your terminal or run: source ~/.zshrc"
     fi
 }
 
 # Main function
 main() {
-    local install_path=""
+    local install_path="$DEFAULT_INSTALL_DIR"
     local force=0
     local dry_run=0
     local uninstall=0
-    local list_paths_flag=0
+    local modify_shell_config=1
     
     # Parse command line arguments
     while [[ $# -gt 0 ]]; do
@@ -329,8 +350,8 @@ main() {
                 dry_run=1
                 shift
                 ;;
-            --list-paths)
-                list_paths_flag=1
+            --no-shell-config)
+                modify_shell_config=0
                 shift
                 ;;
             -*)
@@ -345,14 +366,8 @@ main() {
         esac
     done
     
-    # Handle special flags
-    if [[ "$list_paths_flag" == "1" ]]; then
-        list_paths
-        exit 0
-    fi
-    
     if [[ "$uninstall" == "1" ]]; then
-        uninstall_cli "$dry_run"
+        uninstall_cli "$dry_run" "$install_path"
         exit $?
     fi
     
@@ -367,39 +382,18 @@ main() {
     
     log_success "Found source script: $source_script"
     
-    # Determine install path
-    if [[ -n "$install_path" ]]; then
-        # User specified a path
-        install_path="${install_path/#\~/$HOME}"  # Expand tilde
-        
-        if [[ ! -d "$install_path" ]]; then
-            log_error "Install path does not exist: $install_path"
-            exit 4
-        fi
-        
-        if [[ ! -w "$install_path" ]]; then
-            log_error "No write permission for: $install_path"
-            exit 4
-        fi
-        
-        if ! path_in_env "$install_path"; then
-            log_warn "Warning: $install_path is not in PATH"
-            log_warn "The installed tool may not be accessible from command line"
-        fi
-    else
-        # Find best install path automatically
-        log_info "Finding best installation path..."
-        if ! install_path="$(find_install_path)"; then
-            log_error "Could not find a suitable installation path"
-            log_error "Please specify a custom path or run --list-paths for options"
-            exit 5
-        fi
-    fi
+    # Expand tilde in install path
+    install_path="${install_path/#\~/$HOME}"
     
     log_info "Install path: $install_path"
+    if [[ "$modify_shell_config" == "1" ]]; then
+        log_info "Shell config: $SHELL_CONFIG_FILE"
+    else
+        log_warn "Skipping shell configuration modification"
+    fi
     
     # Perform installation
-    install_cli "$source_script" "$install_path" "$force" "$dry_run"
+    install_cli "$source_script" "$install_path" "$force" "$dry_run" "$modify_shell_config"
 }
 
 # Run main function if script is executed directly
