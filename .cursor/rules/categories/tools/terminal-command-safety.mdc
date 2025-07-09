@@ -1,3 +1,8 @@
+---
+description: Prevents terminal command corruption, merging, and execution issues through safe command practices
+alwaysApply: true
+---
+
 # Terminal Command Safety Rule 🛡️⚡
 
 **Rule ID:** `terminal-safety-001`
@@ -167,53 +172,6 @@ echo "Test message"
 reset
 ```
 
-## Variable and Parameter Safety 🔐
-
-### Safe Variable Usage
-
-```bash
-# ✅ Always quote variables
-BUCKET_NAME="my-bucket-name"
-aws s3api delete-bucket --bucket "$BUCKET_NAME"
-
-# ✅ Validate variables before use
-if [ -z "$BUCKET_NAME" ]; then
-    echo "❌ BUCKET_NAME is not set!"
-    exit 1
-fi
-
-# ✅ Use parameter substitution for defaults
-REGION="${AWS_REGION:-us-east-1}"
-aws s3api create-bucket --bucket "$BUCKET_NAME" --region "$REGION"
-```
-
-### Parameter Validation
-
-```bash
-# ✅ Validate required parameters
-validate_bucket_name() {
-    local bucket_name="$1"
-
-    if [ -z "$bucket_name" ]; then
-        echo "❌ Bucket name is required!"
-        return 1
-    fi
-
-    if [[ ! "$bucket_name" =~ ^[a-z0-9][a-z0-9-]*[a-z0-9]$ ]]; then
-        echo "❌ Invalid bucket name format!"
-        return 1
-    fi
-
-    return 0
-}
-
-# Usage
-if validate_bucket_name "$BUCKET_NAME"; then
-    aws s3api delete-bucket --bucket "$BUCKET_NAME"
-    echo "✅ Bucket $BUCKET_NAME deleted successfully!"
-fi
-```
-
 ## AI Assistant Implementation 🤖
 
 ### When Generating Commands
@@ -237,37 +195,6 @@ fi
 3. **Include error handling** for commands that might fail
 4. **Use clear messaging** to indicate command progress and results
 5. **Separate concerns** - one logical operation per command block
-
-## Testing and Validation 🧪
-
-### Before Execution
-
-```bash
-# ✅ Dry-run commands when possible
-aws s3api delete-bucket --bucket "$BUCKET_NAME" --dry-run 2>/dev/null
-
-# ✅ Validate syntax with shell check
-bash -n script.sh  # Check syntax without execution
-
-# ✅ Test with echo first
-echo "aws s3api delete-bucket --bucket \"$BUCKET_NAME\""
-```
-
-### After Execution
-
-```bash
-# ✅ Verify command completion
-if [ $? -eq 0 ]; then
-    echo "✅ Command executed successfully!"
-else
-    echo "❌ Command failed with exit code: $?"
-fi
-
-# ✅ Verify expected state
-aws s3api head-bucket --bucket "$BUCKET_NAME" 2>/dev/null || {
-    echo "✅ Confirmed: Bucket no longer exists"
-}
-```
 
 ## Emergency Recovery 🚨
 
@@ -293,7 +220,6 @@ aws s3api head-bucket --bucket "$BUCKET_NAME" 2>/dev/null || {
 - Follow [no-blocking-scripts.mdc](./no-blocking-scripts.mdc) for non-blocking execution
 - Use proper Git practices from project standards
 - Implement error handling consistently across all scripts
-- Document complex command sequences
 
 ## Motivation Summary 🎯
 
@@ -304,8 +230,3 @@ aws s3api head-bucket --bucket "$BUCKET_NAME" 2>/dev/null || {
 - **Maintains flow** - keeps development productive without terminal issues ⚡
 
 **Remember:** Safe commands = reliable automation = happy developers! 🚀✨
-description:
-globs:
-alwaysApply: false
-
----
