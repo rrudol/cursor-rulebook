@@ -282,6 +282,14 @@ main() {
     
     # Convert to absolute path
     target_dir="$(cd "$target_dir" && pwd)"
+    source_dir="$(cd "$source_dir" && pwd)"
+
+    # Check if source and target are the same
+    if [[ "$source_dir" == "$target_dir" ]]; then
+        log_warn "Source and target directory are identical: $source_dir"
+        log_warn "Nothing to copy. Please specify a different target directory if you want to copy rules."
+        exit 1
+    fi
     
     # Check if we have read permission on source
     if [[ ! -r "$source_dir" ]]; then
