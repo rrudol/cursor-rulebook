@@ -14,7 +14,7 @@ readonly NC='\033[0m' # No Color
 
 # Script configuration
 readonly SCRIPT_NAME="copy-cursor-rules"
-readonly VERSION="1.0.0"
+readonly VERSION="1.1.0"
 
 # Help text
 show_help() {
@@ -26,7 +26,8 @@ ${YELLOW}USAGE:${NC}
 
 ${YELLOW}DESCRIPTION:${NC}
     Copies all cursor rules (.mdc files) from .cursor/rules directory 
-    to the specified target directory or current working directory.
+    to the specified target directory or automatically detects .cursor folder
+    in current project and copies to .cursor/rules subdirectory.
 
 ${YELLOW}OPTIONS:${NC}
     -h, --help          Show this help message
@@ -34,15 +35,23 @@ ${YELLOW}OPTIONS:${NC}
     -f, --flatten       Copy all rules to a flat structure (no subdirectories)
     -q, --quiet         Suppress output messages
     --dry-run          Show what would be copied without actually copying
+    --no-auto-detect   Disable automatic .cursor folder detection
 
 ${YELLOW}ARGUMENTS:${NC}
-    TARGET_DIR          Target directory to copy rules to (default: current directory)
+    TARGET_DIR          Target directory to copy rules to 
+                       (default: auto-detect .cursor/rules or current directory)
 
 ${YELLOW}EXAMPLES:${NC}
-    ${SCRIPT_NAME}                    # Copy rules to current directory
+    ${SCRIPT_NAME}                    # Auto-detect .cursor folder or use current dir
     ${SCRIPT_NAME} ~/my-project       # Copy rules to specified directory
-    ${SCRIPT_NAME} --flatten          # Copy all rules to current dir without subdirs
+    ${SCRIPT_NAME} --flatten          # Copy all rules to auto-detected dir without subdirs
     ${SCRIPT_NAME} --dry-run          # Preview what would be copied
+    ${SCRIPT_NAME} --no-auto-detect   # Disable auto-detection, use current dir
+
+${YELLOW}AUTO-DETECTION:${NC}
+    If .cursor folder is found in current directory hierarchy, rules will be
+    automatically copied to the .cursor/rules subdirectory of that project.
+    Only .mdc rule files are copied, .md documentation files are excluded.
 
 ${YELLOW}EXIT CODES:${NC}
     0    Success
@@ -71,7 +80,7 @@ log_success() {
     [[ "${QUIET:-0}" == "0" ]] && echo -e "${GREEN}✅ ${1}${NC}" >&2
 }
 
-# Find the .cursor/rules directory
+# Find the .cursor/rules directory (source)
 find_rules_dir() {
     local current_dir="$(pwd)"
     local search_dir="$current_dir"
@@ -98,7 +107,24 @@ find_rules_dir() {
     return 1
 }
 
-# Copy files with directory structure preserved
+# Find local .cursor directory in current project
+find_local_cursor_dir() {
+    local current_dir="$(pwd)"
+    local search_dir="$current_dir"
+    
+    # Search upwards for .cursor directory
+    while [[ "$search_dir" != "/" ]]; do
+        if [[ -d "$search_dir/.cursor" ]]; then
+            echo "$search_dir/.cursor"
+            return 0
+        fi
+        search_dir="$(dirname "$search_dir")"
+    done
+    
+    return 1
+}
+
+# Copy files with directory structure preserved (only .mdc files)
 copy_with_structure() {
     local source_dir="$1"
     local target_dir="$2"
@@ -106,7 +132,7 @@ copy_with_structure() {
     
     log_info "Copying rules with directory structure preserved..."
     
-    # Find all .mdc files and README.md files
+    # Find only .mdc files (no .md files)
     while IFS= read -r -d '' file; do
         local rel_path="${file#$source_dir/}"
         local target_path="$target_dir/$rel_path"
@@ -126,10 +152,10 @@ copy_with_structure() {
                 return 1
             fi
         fi
-    done < <(find "$source_dir" \( -name "*.mdc" -o -name "README.md" \) -type f -print0)
+    done < <(find "$source_dir" -name "*.mdc" -type f -print0)
 }
 
-# Copy files flattened (all in target directory root)
+# Copy files flattened (all in target directory root, only .mdc files)
 copy_flattened() {
     local source_dir="$1"
     local target_dir="$2"
@@ -137,7 +163,7 @@ copy_flattened() {
     
     log_info "Copying rules with flattened structure..."
     
-    # Find all .mdc files
+    # Find only .mdc files
     while IFS= read -r -d '' file; do
         local filename="$(basename "$file")"
         local target_path="$target_dir/$filename"
@@ -162,25 +188,16 @@ copy_flattened() {
             fi
         fi
     done < <(find "$source_dir" -name "*.mdc" -type f -print0)
-    
-    # Copy main README.md if it exists
-    if [[ -f "$source_dir/README.md" ]]; then
-        if [[ "$dry_run" == "1" ]]; then
-            echo "Would copy: README.md"
-        else
-            if cp "$source_dir/README.md" "$target_dir/cursor-rules-README.md"; then
-                log_info "Copied: cursor-rules-README.md"
-            fi
-        fi
-    fi
 }
 
 # Main function
 main() {
-    local target_dir="$(pwd)"
+    local target_dir=""
     local flatten=0
     local dry_run=0
     local quiet=0
+    local auto_detect=1
+    local explicit_target=0
     
     # Parse command line arguments
     while [[ $# -gt 0 ]]; do
@@ -206,6 +223,10 @@ main() {
                 dry_run=1
                 shift
                 ;;
+            --no-auto-detect)
+                auto_detect=0
+                shift
+                ;;
             -*)
                 log_error "Unknown option: $1"
                 echo "Use --help for usage information."
@@ -213,10 +234,27 @@ main() {
                 ;;
             *)
                 target_dir="$1"
+                explicit_target=1
                 shift
                 ;;
         esac
     done
+    
+    # Auto-detect .cursor directory if enabled and no explicit target
+    if [[ "$auto_detect" == "1" && "$explicit_target" == "0" ]]; then
+        log_info "Auto-detecting .cursor directory..."
+        local local_cursor_dir
+        if local_cursor_dir="$(find_local_cursor_dir)"; then
+            target_dir="$local_cursor_dir/rules"
+            log_success "Found .cursor directory, will copy to: $target_dir"
+        else
+            log_info "No .cursor directory found, using current directory"
+            target_dir="$(pwd)"
+        fi
+    elif [[ -z "$target_dir" ]]; then
+        # Default to current directory if no target specified
+        target_dir="$(pwd)"
+    fi
     
     # Find the source rules directory
     log_info "Looking for .cursor/rules directory..."
@@ -259,6 +297,7 @@ main() {
     
     log_info "Source: $source_dir"
     log_info "Target: $target_dir"
+    log_info "Will copy: .mdc files only (no .md files)"
     
     if [[ "$dry_run" == "1" ]]; then
         log_warn "DRY RUN MODE - No files will actually be copied"
@@ -273,6 +312,10 @@ main() {
     
     if [[ "$dry_run" == "0" ]]; then
         log_success "Rules copied successfully to: $target_dir"
+        
+        # Count copied files
+        local mdc_count=$(find "$target_dir" -name "*.mdc" -type f | wc -l)
+        log_info "Total .mdc files copied: $mdc_count"
     else
         log_info "Dry run completed"
     fi
