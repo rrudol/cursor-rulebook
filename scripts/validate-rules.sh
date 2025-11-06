@@ -4,7 +4,7 @@
 # Validates rule syntax, formatting, and best practices
 
 set -e
-# Disable pipefail to handle broken pipes gracefully
+# Disable pipefail to handle broken pipes gracefully in pipelines
 set +o pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -55,7 +55,8 @@ validate_yaml_frontmatter() {
     local content
     
     # Extract frontmatter (between first two --- lines)
-    content=$(awk '/^---$/{if(++count==2) exit} count>=1' "$file" | sed '1d;$d')
+    # Use || true to handle cases where awk/sed might fail
+    content=$(awk '/^---$/{if(++count==2) exit} count>=1' "$file" 2>/dev/null | sed '1d;$d' 2>/dev/null || true)
     
     if [[ -z "$content" ]]; then
         echo -e "${RED}❌ Missing frontmatter${NC}"
@@ -124,7 +125,8 @@ validate_markdown_structure() {
     local content
     
     # Remove frontmatter for markdown analysis
-    content=$(awk '/^---$/{if(++count==2) next} count>=2' "$file")
+    # Use || true to handle cases where awk might fail
+    content=$(awk '/^---$/{if(++count==2) next} count>=2' "$file" 2>/dev/null || true)
     
     # Check for title (first non-empty line should be # Title)
     local first_line=$(echo "$content" | grep -v '^[[:space:]]*$' | head -1 2>/dev/null || true)
@@ -179,7 +181,8 @@ validate_file_naming() {
 
 validate_content_quality() {
     local file="$1"
-    local content=$(cat "$file")
+    local content
+    content=$(cat "$file" 2>/dev/null || echo "")
     
     # Check for placeholder content (excluding code blocks)
     # Remove code blocks first, then check for placeholders
@@ -250,9 +253,10 @@ main() {
     
     # Find all .mdc files
     local rule_files=()
-    while IFS= read -r -d '' file; do
-        rule_files+=("$file")
-    done < <(find "$RULES_DIR" -name "*.mdc" -type f -print0)
+    # Use process substitution with error handling
+    while IFS= read -r -d '' file || [[ -n "$file" ]]; do
+        [[ -n "$file" ]] && rule_files+=("$file")
+    done < <(find "$RULES_DIR" -name "*.mdc" -type f -print0 2>/dev/null || true)
     
     if [[ ${#rule_files[@]} -eq 0 ]]; then
         echo -e "${YELLOW}⚠️  No .mdc files found in $RULES_DIR${NC}"
@@ -264,7 +268,8 @@ main() {
     
     # Validate each file
     for file in "${rule_files[@]}"; do
-        validate_rule_file "$file"
+        # Continue validation even if one file fails
+        validate_rule_file "$file" || true
     done
     
     # Print summary
@@ -277,6 +282,7 @@ main() {
 }
 
 # Handle command line arguments
+STRICT_MODE=0
 case "${1:-}" in
     --help|-h)
         echo "Usage: $0 [options]"
@@ -292,6 +298,14 @@ case "${1:-}" in
         ;;
     --strict)
         STRICT_MODE=1
+        ;;
+    "")
+        # No arguments, continue
+        ;;
+    *)
+        echo "Unknown option: $1" >&2
+        echo "Use --help for usage information" >&2
+        exit 1
         ;;
 esac
 

@@ -7,7 +7,6 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 RULES_DIR="$(dirname "$SCRIPT_DIR")/.cursor/rules"
-TARGET_DIR="${1:-.cursor/rules}"
 
 # Colors for output
 RED='\033[0;31m'
@@ -94,42 +93,66 @@ install_all() {
 }
 
 # Parse arguments
-if [[ $# -eq 0 ]]; then
-    install_all
-    exit 0
-fi
+TARGET_DIR=".cursor/rules"
+INSTALL_MODE="all"
 
-case "${!#}" in  # Last argument
-    --help)
-        print_usage
-        exit 0
-        ;;
-    --list)
-        list_rules
-        exit 0
-        ;;
-    --all)
-        install_all
-        ;;
-    --ai-behavior)
-        install_category "ai-behavior"
-        ;;
-    --project-standards)
-        install_category "project-standards"
-        ;;
-    --tools)
-        install_category "tools"
-        ;;
-    *)
-        if [[ "${!#}" == --* ]]; then
-            echo -e "${RED}Error: Unknown option ${!#}${NC}"
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --help|-h)
+            print_usage
+            exit 0
+            ;;
+        --list)
+            list_rules
+            exit 0
+            ;;
+        --all)
+            INSTALL_MODE="all"
+            shift
+            ;;
+        --ai-behavior)
+            INSTALL_MODE="ai-behavior"
+            shift
+            ;;
+        --project-standards)
+            INSTALL_MODE="project-standards"
+            shift
+            ;;
+        --tools)
+            INSTALL_MODE="tools"
+            shift
+            ;;
+        --*)
+            echo -e "${RED}Error: Unknown option $1${NC}" >&2
             print_usage
             exit 1
-        else
-            install_all
-        fi
-        ;;
-esac
+            ;;
+        *)
+            # First non-option argument is the target directory
+            if [[ "$TARGET_DIR" == ".cursor/rules" ]]; then
+                TARGET_DIR="$1"
+            else
+                echo -e "${RED}Error: Multiple target directories specified${NC}" >&2
+                print_usage
+                exit 1
+            fi
+            shift
+            ;;
+    esac
+done
 
-echo -e "${GREEN}Installation complete! 🎉${NC}"
-echo -e "${BLUE}Don't forget to restart Cursor to load the new rules.${NC}" 
+# Execute installation based on mode
+case "$INSTALL_MODE" in
+    all)
+        install_all
+        ;;
+    ai-behavior)
+        install_category "ai-behavior"
+        ;;
+    project-standards)
+        install_category "project-standards"
+        ;;
+    tools)
+        install_category "tools"
+        ;;
+esac 

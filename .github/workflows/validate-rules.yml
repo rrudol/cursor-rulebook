@@ -24,20 +24,26 @@ jobs:
           python -m pip install --upgrade pip
           pip install PyYAML
 
+      - name: Install ShellCheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+
+      - name: Run ShellCheck on scripts
+        run: |
+          shellcheck scripts/*.sh || echo "::warning::ShellCheck found issues in scripts"
+
       - name: Make validation script executable
         run: chmod +x scripts/validate-rules.sh
 
-      - name: Run rule validation and check results
+      - name: Run rule validation
+        id: validate
         run: |
           # Run validation and capture output
-          if ./scripts/validate-rules.sh > validation_output.txt 2>&1; then
-            echo "::notice::All rules validated successfully"
-            cat validation_output.txt
-          else
-            echo "::error::Validation failed - found errors in cursor rules"
-            cat validation_output.txt
-            exit 1
-          fi
+          ./scripts/validate-rules.sh > validation_output.txt 2>&1 || VALIDATION_EXIT=$?
+          cat validation_output.txt
+          # Exit with the validation script's exit code
+          exit "${VALIDATION_EXIT:-0}"
 
       - name: Upload validation results
         if: always()
@@ -46,3 +52,4 @@ jobs:
           name: validation-results
           path: validation_output.txt
           retention-days: 30
+          if-no-files-found: ignore

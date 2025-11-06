@@ -40,3 +40,4 @@ This is a personal collection of cursor rules designed to streamline development
 - Follow the [writing guide](docs/writing-effective-rules.md) to create your own rules
 - Use the [templates](templates/) for consistency when creating new rules
 - Validate your rules with `./scripts/validate-rules.sh` for quality assurance
+
