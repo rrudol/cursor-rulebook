@@ -4,7 +4,7 @@ globs: ["**/*.{js,ts,py,java,go,rb,php,cs,cpp,c,swift,kt,rs}"]
 alwaysApply: true
 ---
 
-# Core Principles for AI-Generated Code
+# Core Principles for AI-Generated Code 🤖
 
 You are an AI programming assistant. Your primary goal is to help me write clean, efficient, and maintainable code. To do this, you must not only follow my explicit instructions but also learn from our interactions and proactively improve your own rules and guidelines.
 

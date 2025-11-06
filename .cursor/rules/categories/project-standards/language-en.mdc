@@ -1,4 +1,5 @@
 ---
+description: Enforces English language consistency across all source code, documentation, and project communications
 alwaysApply: true
 ---
 
@@ -25,13 +26,35 @@ All source code identifiers, inline comments, documentation, commit messages, an
 
 > 🚫 Avoid mixing languages within a single file or commit.
 
-## Violation Examples ❌
+## Examples
+
+### ❌ Bad
 
 | Bad                              | Good                           |
 | -------------------------------- | ------------------------------ |
 | `const liczbaUzytkownikow = 10;` | `const userCount = 10;`        |
 | `// liczy sumę`                  | `// calculates the sum`        |
 | `feat: dodaj obsługę płatności`  | `feat: add payment processing` |
+
+### ✅ Good
+
+```typescript
+// ✅ English variable names and comments
+const userCount = 10;
+const isAuthenticated = true;
+
+// Calculate total price including tax
+const calculateTotalPrice = (basePrice: number, taxRate: number): number => {
+  return basePrice * (1 + taxRate);
+};
+```
+
+```bash
+# ✅ English commit messages
+git commit -m "feat: add user authentication system"
+git commit -m "fix: resolve memory leak in payment processor"
+git commit -m "docs: update API documentation for v2.0"
+```
 
 ## Enforcement 🛡️
 
@@ -41,39 +64,3 @@ All source code identifiers, inline comments, documentation, commit messages, an
 ---
 
 _Want to contribute? See the project **CONTRIBUTING.md**._
-
-# Language Consistency Rule 🇬🇧
-
-**Rule ID:** `language-en-001`
-
-## Statement
-
-All source code identifiers, inline comments, documentation, commit messages, and user-facing strings **MUST** be written in English.
-
-## Motivation ✨
-
-• Ensures readability for global contributors. 🌍  
-• Facilitates code search and tooling that assumes ASCII/English text.🔎  
-• Reduces cognitive load when switching between projects. 🧠
-
-## Guidelines
-
-1. **Code symbols** – variable names, functions, classes, file names ➡️ English.
-2. **Comments & docstrings** – use clear, concise English sentences.
-3. **UI/UX text** – default locale strings in English. (Localization handled separately.)
-4. **Commit messages & PR titles/descriptions** – follow [Conventional Commits](https://www.conventionalcommits.org), written in English.
-
-> 🚫 Avoid mixing languages within a single file or commit.
-
-## Violation Examples ❌
-
-| Bad                              | Good                           |
-| -------------------------------- | ------------------------------ |
-| `const liczbaUzytkownikow = 10;` | `const userCount = 10;`        |
-| `// liczy sumę`                  | `// calculates the sum`        |
-| `feat: dodaj obsługę płatności`  | `feat: add payment processing` |
-
-## Enforcement 🛡️
-
-- **Code Review:** Reviewers should reject non-English additions.
-- **Linting (optional):** Configure linters (e.g. ESLint plugin) or CI checks for disallowed non-ASCII characters.

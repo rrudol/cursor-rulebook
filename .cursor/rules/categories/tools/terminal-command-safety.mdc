@@ -1,0 +1,311 @@
+# Terminal Command Safety Rule 🛡️⚡
+
+**Rule ID:** `terminal-safety-001`
+
+## Statement
+
+Always execute terminal commands safely to prevent corruption, merging, concatenation errors, and terminal state issues that can lead to stuck or malformed command execution.
+
+## Motivation ✨
+
+• Prevents command corruption and merging that leads to stuck terminal sessions 🔒  
+• Ensures commands execute as intended without unexpected concatenation 🎯  
+• Maintains clean terminal state and prevents quote/escape sequence issues 🧹  
+• Reduces debugging time caused by malformed command execution 🚀
+
+## The Problem 🚨
+
+Commands can get corrupted during processing, leading to issues like:
+
+```bash
+# ❌ Example of corrupted command (what user experienced)
+aws s3api delete-bucket --bucket personal-cloud-terraform-state-1752075201
+echo "✅ Old bucket deleted succesaws s3api delete-bucket --bucket personal-cloud-terraform-state-175207520echo "✅ Old bucket deleted successfully!"
+dquote>
+dquote>
+```
+
+This creates:
+
+- Merged commands that execute unintended actions
+- Unclosed quotes causing terminal to wait for input
+- Corrupted command strings that fail silently or dangerously
+
+## Safe Command Practices ✅
+
+### 1. Command Isolation
+
+```bash
+# ✅ Execute commands separately with clear boundaries
+aws s3api delete-bucket --bucket personal-cloud-terraform-state-1752075201
+
+# Wait for completion, then execute next command
+echo "✅ Old bucket deleted successfully!"
+```
+
+```bash
+# ✅ Use explicit command separation
+aws s3api delete-bucket --bucket my-bucket && \
+echo "✅ Bucket deleted successfully!"
+
+# Or with explicit newlines
+aws s3api delete-bucket --bucket my-bucket
+echo "✅ Bucket deleted successfully!"
+```
+
+### 2. Proper Quote Handling
+
+```bash
+# ✅ Consistent quote usage
+echo "✅ Operation completed successfully!"
+
+# ✅ Escape quotes when needed
+echo "The bucket \"my-bucket\" was deleted successfully!"
+
+# ✅ Use single quotes for literal strings
+echo '✅ All special characters $@#% preserved literally!'
+```
+
+### 3. Command Validation
+
+```bash
+# ✅ Validate commands before execution
+BUCKET_NAME="personal-cloud-terraform-state-1752075201"
+
+# Check if bucket exists first
+if aws s3api head-bucket --bucket "$BUCKET_NAME" 2>/dev/null; then
+    aws s3api delete-bucket --bucket "$BUCKET_NAME"
+    echo "✅ Bucket $BUCKET_NAME deleted successfully!"
+else
+    echo "⚠️  Bucket $BUCKET_NAME not found or inaccessible"
+fi
+```
+
+### 4. Error-Safe Execution
+
+```bash
+# ✅ Use error handling to prevent cascading failures
+aws s3api delete-bucket --bucket "$BUCKET_NAME" || {
+    echo "❌ Failed to delete bucket $BUCKET_NAME"
+    exit 1
+}
+
+echo "✅ Bucket deleted successfully!"
+```
+
+## Command Formatting Guidelines 📝
+
+### Do's ✅
+
+```bash
+# ✅ One command per line
+aws s3api list-buckets
+aws s3api delete-bucket --bucket my-bucket
+echo "✅ Operations completed!"
+
+# ✅ Use proper line continuation
+aws s3api put-bucket-policy \
+    --bucket my-bucket \
+    --policy file://policy.json
+
+# ✅ Group related commands with clear separation
+echo "🗑️  Deleting S3 bucket..."
+aws s3api delete-bucket --bucket my-bucket
+echo "✅ S3 bucket deleted!"
+
+echo "🧹 Cleaning up local files..."
+rm -rf ./temp/*
+echo "✅ Local cleanup completed!"
+```
+
+### Don'ts ❌
+
+```bash
+# ❌ Never merge commands on same line without proper separation
+aws s3api delete-bucket --bucket my-bucketecho "deleted"
+
+# ❌ Avoid complex command chaining without error handling
+aws s3api delete-bucket --bucket b1 && aws s3api delete-bucket --bucket b2 && echo "done"
+
+# ❌ Don't use unescaped special characters
+echo "Bucket $BUCKET_NAME deleted successfully!" # Unquoted variable
+```
+
+## Terminal State Management 🔄
+
+### Prevention Techniques
+
+```bash
+# ✅ Always reset terminal state if issues occur
+reset  # Clears terminal state
+stty sane  # Restores terminal settings
+
+# ✅ Use timeout for potentially hanging commands
+timeout 30s aws s3api list-buckets || echo "⏰ Command timed out"
+
+# ✅ Check terminal state before complex operations
+if [ -t 0 ]; then
+    echo "✅ Terminal is interactive, proceeding..."
+else
+    echo "⚠️  Non-interactive terminal, adjusting execution..."
+fi
+```
+
+### Recovery from Stuck State
+
+```bash
+# If you see 'dquote>' or similar prompts:
+
+# ✅ Option 1: Complete the quote
+echo "completion text here"
+
+# ✅ Option 2: Cancel with Ctrl+C
+# Then verify terminal state:
+echo "Test message"
+
+# ✅ Option 3: Reset terminal entirely
+reset
+```
+
+## Variable and Parameter Safety 🔐
+
+### Safe Variable Usage
+
+```bash
+# ✅ Always quote variables
+BUCKET_NAME="my-bucket-name"
+aws s3api delete-bucket --bucket "$BUCKET_NAME"
+
+# ✅ Validate variables before use
+if [ -z "$BUCKET_NAME" ]; then
+    echo "❌ BUCKET_NAME is not set!"
+    exit 1
+fi
+
+# ✅ Use parameter substitution for defaults
+REGION="${AWS_REGION:-us-east-1}"
+aws s3api create-bucket --bucket "$BUCKET_NAME" --region "$REGION"
+```
+
+### Parameter Validation
+
+```bash
+# ✅ Validate required parameters
+validate_bucket_name() {
+    local bucket_name="$1"
+
+    if [ -z "$bucket_name" ]; then
+        echo "❌ Bucket name is required!"
+        return 1
+    fi
+
+    if [[ ! "$bucket_name" =~ ^[a-z0-9][a-z0-9-]*[a-z0-9]$ ]]; then
+        echo "❌ Invalid bucket name format!"
+        return 1
+    fi
+
+    return 0
+}
+
+# Usage
+if validate_bucket_name "$BUCKET_NAME"; then
+    aws s3api delete-bucket --bucket "$BUCKET_NAME"
+    echo "✅ Bucket $BUCKET_NAME deleted successfully!"
+fi
+```
+
+## AI Assistant Implementation 🤖
+
+### When Generating Commands
+
+```bash
+# ✅ Always format as separate, complete commands
+echo "🗑️  Deleting S3 bucket: $BUCKET_NAME"
+aws s3api delete-bucket --bucket "$BUCKET_NAME"
+
+if [ $? -eq 0 ]; then
+    echo "✅ Bucket deleted successfully!"
+else
+    echo "❌ Failed to delete bucket!"
+fi
+```
+
+### Command Generation Rules
+
+1. **Never concatenate** commands on the same line without explicit separators
+2. **Always validate** command syntax before suggesting execution
+3. **Include error handling** for commands that might fail
+4. **Use clear messaging** to indicate command progress and results
+5. **Separate concerns** - one logical operation per command block
+
+## Testing and Validation 🧪
+
+### Before Execution
+
+```bash
+# ✅ Dry-run commands when possible
+aws s3api delete-bucket --bucket "$BUCKET_NAME" --dry-run 2>/dev/null
+
+# ✅ Validate syntax with shell check
+bash -n script.sh  # Check syntax without execution
+
+# ✅ Test with echo first
+echo "aws s3api delete-bucket --bucket \"$BUCKET_NAME\""
+```
+
+### After Execution
+
+```bash
+# ✅ Verify command completion
+if [ $? -eq 0 ]; then
+    echo "✅ Command executed successfully!"
+else
+    echo "❌ Command failed with exit code: $?"
+fi
+
+# ✅ Verify expected state
+aws s3api head-bucket --bucket "$BUCKET_NAME" 2>/dev/null || {
+    echo "✅ Confirmed: Bucket no longer exists"
+}
+```
+
+## Emergency Recovery 🚨
+
+### If Commands Get Stuck
+
+1. **Interrupt execution**: `Ctrl+C`
+2. **Check terminal state**: `echo "test"`
+3. **Reset if needed**: `reset` or `stty sane`
+4. **Verify environment**: Check variables and current directory
+5. **Re-execute safely**: Use validated, isolated commands
+
+### Prevention Checklist
+
+- [ ] Commands are properly quoted
+- [ ] Variables are validated and quoted
+- [ ] Commands are executed separately
+- [ ] Error handling is included
+- [ ] Terminal state is checked before complex operations
+- [ ] Timeouts are used for potentially hanging commands
+
+## Related Guidelines 📚
+
+- Follow [no-blocking-scripts.mdc](./no-blocking-scripts.mdc) for non-blocking execution
+- Use proper Git practices from project standards
+- Implement error handling consistently across all scripts
+- Document complex command sequences
+
+## Motivation Summary 🎯
+
+- **Prevents corruption** - eliminates command merging and terminal state issues 🛡️
+- **Ensures reliability** - commands execute as intended every time ✅
+- **Reduces debugging** - fewer mysterious failures and stuck sessions 🔧
+- **Improves safety** - prevents accidental command execution 🚨
+- **Maintains flow** - keeps development productive without terminal issues ⚡
+
+**Remember:** Safe commands = reliable automation = happy developers! 🚀✨
+description:
+globs:
+alwaysApply: false
+
+---

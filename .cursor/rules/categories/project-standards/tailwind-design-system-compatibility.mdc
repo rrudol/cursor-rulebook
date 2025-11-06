@@ -1,3 +1,10 @@
+---
+description: When using external design systems that depend on Tailwind CSS
+globs:
+  ["**/tailwind.config.*", "**/postcss.config.*", "**/package.json", "**/*.css"]
+alwaysApply: false
+---
+
 # Tailwind CSS & Design System Compatibility Rule 🎨
 
 **Rule ID:** `tailwind-design-system-001`
@@ -103,6 +110,77 @@ const TestComponent = () => (
 );
 ```
 
+## Examples
+
+### ✅ Correct Implementation
+
+```javascript
+// tailwind.config.js - Proper setup for external design system
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+    "./node_modules/@company/design-system/dist/**/*.{js,jsx,ts,tsx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+};
+```
+
+```javascript
+// postcss.config.js - Standard plugin configuration
+export default {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+};
+```
+
+```typescript
+// Component usage with proper styling
+import { Button } from "@company/design-system";
+
+const App = () => (
+  <div className="p-4">
+    <Button variant="primary">Styled Button</Button>
+    {/* Button renders with proper design system styles */}
+  </div>
+);
+```
+
+### ❌ Common Mistakes
+
+```javascript
+// tailwind.config.js - Missing design system paths
+export default {
+  content: [
+    "./src/**/*.{js,ts,jsx,tsx}",
+    // ❌ Missing: "./node_modules/@company/design-system/dist/**/*.{js,jsx,ts,tsx}",
+  ],
+  // Result: Design system components have no styling
+};
+```
+
+```javascript
+// postcss.config.js - Using experimental v4 syntax
+export default {
+  plugins: {
+    "@tailwindcss/postcss": {}, // ❌ Causes compatibility issues
+    autoprefixer: {},
+  },
+};
+```
+
+```bash
+# ❌ Installing incompatible Tailwind v4
+pnpm add -D tailwindcss@4.x.x
+# Result: Plugin compatibility issues and build failures
+```
+
 ## Warning Signs 🚨
 
 Stop and check Tailwind configuration if you see:
@@ -174,11 +252,6 @@ This rule prevents:
 - Missing CSS class generation
 - Design system integration problems
 
----
-
 **Remember**: External design systems + Tailwind CSS = Main project MUST have Tailwind configured! 🎨✨
-description:
-globs:
-alwaysApply: false
 
----
+- Design system integration problems

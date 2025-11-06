@@ -1,3 +1,9 @@
+---
+description: Prevents running blocking development scripts that halt AI workflow
+globs: ["**/package.json", "**/scripts/**", "**/*.sh"]
+alwaysApply: true
+---
+
 # No Blocking Development Scripts Rule 🚫⏳
 
 **Rule ID:** `dev-scripts-001`
@@ -79,6 +85,61 @@ yarn test
 pnpm run preview --timeout 5000
 ```
 
+## Examples
+
+### ✅ Correct Approach
+
+```bash
+# When user asks to run the development server
+echo "I'll build the project to analyze any issues instead:"
+pnpm run build
+
+# Then analyze the output
+if [ $? -eq 0 ]; then
+  echo "✅ Build successful! Project is ready."
+else
+  echo "❌ Build failed. Let me check the errors..."
+  # Analyze specific error messages and provide fixes
+fi
+```
+
+```javascript
+// package.json - Preferred scripts for AI assistance
+{
+  "scripts": {
+    "build": "vite build",           // ✅ Good - analyzable output
+    "test": "vitest run",            // ✅ Good - finite execution
+    "lint": "eslint . --ext ts,tsx", // ✅ Good - quick analysis
+    "type-check": "tsc --noEmit"     // ✅ Good - validation only
+  }
+}
+```
+
+### ❌ What NOT to Run
+
+```bash
+# ❌ These commands will block the AI indefinitely
+pnpm dev          # Starts development server
+npm start         # Usually starts a server
+yarn serve        # Serves the application
+nodemon app.js    # Watches and restarts automatically
+
+# ❌ Interactive commands that wait for user input
+npx create-react-app my-app    # Prompts for configuration
+npm init                       # Asks interactive questions
+```
+
+```javascript
+// package.json - Scripts to avoid running directly
+{
+  "scripts": {
+    "dev": "vite",              // ❌ Blocks - starts dev server
+    "start": "node server.js",  // ❌ Blocks - runs server
+    "watch": "nodemon app.js"   // ❌ Blocks - continuous watching
+  }
+}
+```
+
 ## Implementation Guidelines 🛡️
 
 ### When User Requests Development Server
@@ -96,7 +157,7 @@ command instead to analyze any issues:
 
 `pnpm run build`
 
-[Analyze build output and provide specific recommendations]
+Analyze build output and provide specific recommendations
 
 If you need to run the dev server manually, you can use: `pnpm dev`
 ```
@@ -185,8 +246,3 @@ prettier --write .
 - **Prevents frustration** - no need to manually terminate blocked processes 😌
 
 Remember: **Build, analyze, and guide - don't block and wait!** 🚀✨
-description:
-globs:
-alwaysApply: false
-
----
